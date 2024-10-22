@@ -14,14 +14,14 @@ const { mobile } = useDisplay()
       <v-row>
             <v-col cols="12" md="8" class="mx-auto">
               <v-card
-    class="mx-auto d-flex border-opacity-100" border="error md" elevation="24" color="red-darken-4"
+    class="mx-auto border-opacity-100" border="error md" elevation="24" color="red-darken-4"
     >
 
     <template v-slot:title>
     
         <v-card-title>
     <v-img class="mx-auto" src="/images/bookshelf-logo.jpg" 
-    :width="mobile ? '100%' : '75%'"
+    :width="mobile ? '50%' : '25%'"
     ></v-img>
     <h3 class="font-weight-black text-center">Book Shelf</h3>
     <p class="font-weight-bold text-center">Login Form</p>
