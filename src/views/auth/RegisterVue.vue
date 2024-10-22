@@ -8,6 +8,7 @@ function onClick() {
 }
 </script>
 
+
 <template>
   <v-responsive class="border rounded">
     <v-app :theme="theme">
@@ -23,46 +24,48 @@ function onClick() {
       </v-app-bar>
 
       <v-main>
-        <v-container class="mt-16 py-12">
+        <v-container class="mt-16 py-6">
           <v-row>
             <v-col cols="12" md="8" class="mx-auto">
               <v-card
-    class="mx-auto d-flex border-opacity-100" border="error md" elevation="24"
-    >
+   class="mx-auto d-flex border-opacity-100" border="error md"
+   elevation="24"
+    prepend-icon="mdi-account"
+    subtitle="Sign Up">
 
-  
-    
-    <template v-slot:title>
-      <span class="font-weight-light pl-13 pr-13 pt-0">Book Hunt</span>
+
+    <template v-slot:title >
+      <span class="font-weight-black justify-center d-flex">Book Hunt</span>
     </template>
 
-    
-
     <v-card-text class="bg-surface-light pt-4">
+      <v-form fast-fail @submit.prevent>
+     
+    <v-row>
+        <v-text-field
+       prepend-icon="mdi-account" label="Firstname" variant="outlined" class="v-col-6"></v-text-field>
 
-      <h2 class="text-center">Welcome to Hulam-hulam Ra!</h2>
-
-      <v-form fast-fail @submit.prevent class="pr-4">
       <v-text-field
-      class="pt-3" prepend-icon="mdi-email" label="Email" variant="outlined" 
+        label="Lastname" variant="outlined" class="v-col-6"></v-text-field>
+    </v-row>
+
+      <v-text-field
+       prepend-icon="mdi-email" label="Email" variant="outlined" class="my-2"
       ></v-text-field>
 
       <v-text-field
        prepend-icon="mdi-lock" label="Password" variant="outlined" type="password"
       ></v-text-field>
 
-      <v-select
-    class="pl-10" label="Select":items="['Borrower', 'Librarian']"
-    variant="outlined" density="compact"></v-select>
-
+      <v-text-field
+       label="Password Confirmation" variant="outlined" type="password" class="my-2 pl-10"
+      ></v-text-field>
 
       <v-btn class="mt-2 mx-auto d-flex" color="red-darken-4" type="submit">Log In</v-btn>
     </v-form>
-
-    <v-divider class="my-5">
-      <h5>Don't have an account? <router-link to="/register">Click here to Register</router-link> </h5>
-    </v-divider>
-
+      <v-divider class="my-6">
+        <h5>Have an existing account? <RouterLink to="/">Login Here</RouterLink></h5>
+      </v-divider>
     </v-card-text>
   </v-card>
             </v-col>
@@ -73,3 +76,4 @@ function onClick() {
     </v-app>
   </v-responsive>
 </template>
+
