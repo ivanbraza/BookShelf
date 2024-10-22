@@ -33,7 +33,6 @@ const { mobile } = useDisplay()
     
 
     <v-card-text class="bg-surface-light pt-4">
-
       <h2 class="text-center">Welcome to Book Shelf!</h2>
       <v-divider class="my-5"></v-divider>
 
