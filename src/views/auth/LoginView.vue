@@ -1,39 +1,32 @@
 <script setup>
 import { ref } from 'vue'
+import AppLayout from '@/components/layout/AppLayout.vue';
+import { useDisplay } from 'vuetify'
 
-const theme = ref('light')
+const { mobile } = useDisplay()
 
-function onClick() {
-  theme.value = theme.value === 'light' ? 'dark' : 'light'
-}
 </script>
 
 <template>
-  <v-responsive class="border rounded">
-    <v-app :theme="theme">
-      <v-app-bar class="px-3" color="red-darken-4">
-        <v-spacer></v-spacer>
-
-        <v-btn
-          :prepend-icon = "theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
-          text="Toggle Theme"
-          slim
-          @click="onClick"
-        ></v-btn>
-      </v-app-bar>
-
-      <v-main>
-        <v-container class="mt-16 py-12">
-          <v-row>
+  <AppLayout>
+    <template #content>
+      <v-row>
             <v-col cols="12" md="8" class="mx-auto">
               <v-card
-    class="mx-auto d-flex border-opacity-100" border="error md" elevation="24"
+    class="mx-auto d-flex border-opacity-100" border="error md" elevation="24" color="red-darken-4"
     >
 
-  
-    
     <template v-slot:title>
-      <span class="font-weight-light pl-13 pr-13 pt-0">Book Hunt</span>
+    
+        <v-card-title>
+    <v-img class="mx-auto" src="/images/bookshelf-logo.jpg" 
+    :width="mobile ? '100%' : '75%'"
+    ></v-img>
+    <h3 class="font-weight-black text-center">Book Shelf</h3>
+    <p class="font-weight-bold text-center">Login</p>
+   </v-card-title>
+
+     
     </template>
 
     
@@ -52,11 +45,11 @@ function onClick() {
       ></v-text-field>
 
       <v-select
-    class="pl-10" label="Select":items="['Borrower', 'Librarian']"
+    class="pl-10" label="Select Role":items="['Borrower', 'Librarian']"
     variant="outlined" density="compact"></v-select>
 
 
-      <v-btn class="mt-2 mx-auto d-flex" color="red-darken-4" type="submit">Log In</v-btn>
+      <v-btn class="mt-2 mx-auto d-flex" color="red-darken-4" prepend-icon="mdi-login" type="submit">Log In</v-btn>
     </v-form>
 
     <v-divider class="my-5">
@@ -67,9 +60,7 @@ function onClick() {
   </v-card>
             </v-col>
           </v-row>
-        </v-container>
-      </v-main>
-      <v-footer color="red-darken-4" border app>2024 - BookHunt</v-footer>
-    </v-app>
-  </v-responsive>
+    </template>
+  </AppLayout>
+         
 </template>

@@ -1,42 +1,27 @@
 <script setup>
 import { ref } from 'vue'
+import AppLayout from '@/components/layout/AppLayout.vue';
+import { useDisplay } from 'vuetify'
+const { mobile } = useDisplay()
 
-const theme = ref('light')
-
-function onClick() {
-  theme.value = theme.value === 'light' ? 'dark' : 'light'
-}
 </script>
 
 
 <template>
-  <v-responsive class="border rounded">
-    <v-app :theme="theme">
-      <v-app-bar class="px-3" color="red-darken-4">
-        <v-spacer></v-spacer>
-
-        <v-btn
-          :prepend-icon = "theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
-          text="Toggle Theme"
-          slim
-          @click="onClick"
-        ></v-btn>
-      </v-app-bar>
-
-      <v-main>
-        <v-container class="mt-16 py-6">
-          <v-row>
+  <AppLayout>
+    <template #content>
+    <v-row>
             <v-col cols="12" md="8" class="mx-auto">
               <v-card
-   class="mx-auto d-flex border-opacity-100" border="error md"
-   elevation="24"
-    prepend-icon="mdi-account"
-    subtitle="Sign Up">
-
-
-    <template v-slot:title >
-      <span class="font-weight-black justify-center d-flex">Book Hunt</span>
-    </template>
+   class="mx-auto border-opacity-100" border="error md" color="red-darken-4"
+   elevation="24">
+   <v-card-title>
+    <v-img class="mx-auto" src="/images/bookshelf-logo.jpg" 
+    :width="mobile ? '75%' : '25%'"  height="180"
+    ></v-img>
+    <h3 class="font-weight-bold text-center">Book Shelf</h3>
+    <p class="font-weight-light text-center">Registration Form</p>
+   </v-card-title>
 
     <v-card-text class="bg-surface-light pt-4">
       <v-form fast-fail @submit.prevent>
@@ -58,10 +43,14 @@ function onClick() {
       ></v-text-field>
 
       <v-text-field
-       label="Password Confirmation" variant="outlined" type="password" class="my-2 pl-10"
+       prepend-icon="mdi-lock-check" label="Password Confirmation" variant="outlined" type="password" class="my-2"
       ></v-text-field>
 
-      <v-btn class="mt-2 mx-auto d-flex" color="red-darken-4" type="submit">Log In</v-btn>
+      <v-select
+    class="pl-10" label="Select Role":items="['Borrower', 'Librarian']"
+    variant="outlined" density="compact"></v-select>
+
+      <v-btn class="mt-2 mx-auto d-flex" color="red-darken-4" prepend-icon="mdi-account-plus" type="submit">Register</v-btn>
     </v-form>
       <v-divider class="my-6">
         <h5>Have an existing account? <RouterLink to="/">Login Here</RouterLink></h5>
@@ -70,10 +59,8 @@ function onClick() {
   </v-card>
             </v-col>
           </v-row>
-        </v-container>
-      </v-main>
-      <v-footer color="red-darken-4" border app>2024 - BookHunt</v-footer>
-    </v-app>
-  </v-responsive>
+        </template>
+  </AppLayout>
+        
 </template>
 
