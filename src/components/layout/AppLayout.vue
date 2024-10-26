@@ -11,7 +11,7 @@ function onClick() {
 <template>
     <v-responsive class="border rounded">
       <v-app :theme="theme">
-        <v-app-bar class="px-3" color="red-darken-3">
+        <v-app-bar class="px-2" color="red-darken-3">
           <v-spacer></v-spacer>
 <!--   
           <v-btn
@@ -23,7 +23,7 @@ function onClick() {
         </v-app-bar>
   
         <v-main>
-          <v-container class="mt-16 py-6">
+          <v-container class="mt-3 pt-2">
 
             <slot name="content"></slot>
 
