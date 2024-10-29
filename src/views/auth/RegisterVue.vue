@@ -12,26 +12,26 @@ const { mobile } = useDisplay()
   <AppLayout>
     <template #content>
     <v-row>
-            <v-col cols="12" md="8" class="mx-auto">
+            <v-col cols="12" md="4" sm="8" class="mx-auto">
               <v-card
    class="mx-auto border-opacity-100" border="error md" color="red-darken-4"
    elevation="24">
    <v-card-title>
     <v-img class="mx-auto" src="/images/bookshelf-logo.jpg" 
-    :width="mobile ? '75%' : '25%'"  height="180"
+    :width="mobile ? '50%' : '30%'"  height="75"
     ></v-img>
-    <h3 class="font-weight-bold text-center">Book Shelf</h3>
-    <p class="font-weight-light text-center">Registration Form</p>
+    <h4 class="font-weight-bold text-center">Book Shelf</h4>
+    <h6 class="font-weight-light text-center">Registration Form</h6>
    </v-card-title>
 
-    <v-card-text class="bg-surface-light pt-4">
+    <v-card-text class="bg-surface-light ">
       
-      <v-divider class="my-6"></v-divider>
+      <v-divider class="my-3"></v-divider>
 
       <RegisterForm></RegisterForm>
      
-      <v-divider class="my-6">
-        <h5>Have an existing account? <RouterLink to="/">Login Here</RouterLink></h5>
+      <v-divider class="my-5">
+        <h6>Have an existing account? <router-link  to="/" class="text-red-accent-4 font-weight-black">Login Here</router-link></h6>
       </v-divider>
     </v-card-text>
   </v-card>

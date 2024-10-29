@@ -80,7 +80,7 @@ const onFormSubmit = () => {
         prepend-icon="mdi-account"
         label="Firstname"
         variant="outlined"
-        class="v-col-6"
+        class="v-col-6 "
         :rules="[requiredValidator]"
       ></v-text-field>
 
@@ -98,7 +98,6 @@ const onFormSubmit = () => {
       prepend-icon="mdi-email"
       label="Email"
       variant="outlined"
-      class="my-2"
       :rules="[requiredValidator, emailValidator]"
     ></v-text-field>
 
@@ -110,7 +109,6 @@ const onFormSubmit = () => {
       :type="isPasswordVisible ? 'text' : 'password'"
       :append-inner-icon="isPasswordVisible ? 'mdi-eye-off' : 'mdi-eye'"
       @click:append-inner="isPasswordVisible = !isPasswordVisible"
-      class="my-2"
       :rules="[requiredValidator, passwordValidator]"
     ></v-text-field>
 
@@ -123,10 +121,7 @@ const onFormSubmit = () => {
       :append-inner-icon="isPasswordConfirmVisible ? 'mdi-eye-off' : 'mdi-eye'"
       @click:append-inner="isPasswordConfirmVisible = !isPasswordConfirmVisible"
       class="my-2"
-      :rules="[
-        requiredValidator,
-        confirmedValidator(formData.password_confirmation, formData.password),
-      ]"
+      :rules="[requiredValidator, confirmedValidator(formData.password_confirmation,formData.password)]"
     ></v-text-field>
 
     <v-select
@@ -140,7 +135,7 @@ const onFormSubmit = () => {
     ></v-select>
 
     <v-btn
-      class="mt-2 mx-auto d-flex"
+      class=" mx-auto d-flex  "
       color="red-darken-4"
       prepend-icon="mdi-account-plus"
       :disabled="formAction.formProcess"
