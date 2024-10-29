@@ -8,7 +8,7 @@ const refVForm = ref()
 const formDataDefault = {
   email: '',
   password: '',
-  roles: '',
+  role: '',
 }
 
 const formData = ref({
@@ -48,7 +48,7 @@ const onFormSubmit = () => {
     ></v-text-field>
 
     <v-select
-    v-model="formData.roles"
+    v-model="formData.role"
       class="pl-10"
       label="Select Role"
       :items="['Borrower', 'Librarian']"
