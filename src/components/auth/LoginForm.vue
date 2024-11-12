@@ -1,11 +1,10 @@
 
 <script setup>
-import { formActionDefault, supabase } from '@/utils/supabase';
-import { requiredValidator, emailValidator } from '@/utils/validators'
 import { ref } from 'vue'
-import AlertNotification from '../common/AlertNotification.vue'
+import { requiredValidator, emailValidator } from '@/utils/validators'
 
-
+const isPasswordVisible = ref(false)
+const refVForm = ref()
 
 const formDataDefault = {
   email: '',
@@ -17,37 +16,9 @@ const formData = ref({
   ...formDataDefault,
 })
 
-const formAction = ref({
-  ...formActionDefault,
-})
-
-const isPasswordVisible = ref(false)
-const refVForm = ref()
-
-const onSubmit = async () => {
-  formAction.value = { ...formActionDefault }
-  formAction.value.formProcess = true
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-  email: formData.value.email,
-  password: formData.value.password,
-  role: formData.value.role,
-})
-
-if (error) {
-    
-    formAction.value.formErrorMessage = error.message
-    formAction.value.formStatus = error.status
-  } else if (data) {
-   
-    formAction.value.formSuccessMessage = 'Successfully Logged Account.'
-  }
-
-refVForm.value?.reset()
-formAction.value.formProcess = false
+const onSubmit = () => {
+// alert(formData.value.email)
 }
-
-
 const onFormSubmit = () => {
   refVForm.value?.validate().then(({ valid}) => {
     if (valid) onSubmit()
@@ -56,13 +27,6 @@ const onFormSubmit = () => {
 </script>
 
 <template>
-
-<AlertNotification
-    :form-success-message="formAction.formSuccessMessage"
-    :form-error-message="formAction.formErrorMessage"
-  >
-  </AlertNotification>
-
   <v-form ref="refVForm"@submit.prevent="onFormSubmit" class="pr-4">
     <v-text-field
       v-model="formData.email"
@@ -79,7 +43,7 @@ const onFormSubmit = () => {
       label="Password"
       variant="outlined"
       :type="isPasswordVisible ? 'text' : 'password'"
-      :append-inner-icon="isPasswordVisible ? 'mdi-eye' : 'mdi-eye-off'"
+      :append-inner-icon="isPasswordVisible ? 'mdi-eye-off' : 'mdi-eye'"
       @click:append-inner="isPasswordVisible = !isPasswordVisible"
       :rules="[requiredValidator]"
     ></v-text-field>
@@ -96,7 +60,7 @@ const onFormSubmit = () => {
 
     <v-btn
       class="mt-2 mx-auto d-flex"
-      color="red-darken-4"
+      color="indigo-darken-4"
       prepend-icon="mdi-login"
       type="submit"
       >Log In</v-btn

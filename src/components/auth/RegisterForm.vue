@@ -137,7 +137,7 @@ const onFormSubmit = () => {
 
     <v-btn
       class=" mx-auto d-flex  "
-      color="red-darken-4"
+      color="indigo-darken-4"
       prepend-icon="mdi-account-plus"
       :disabled="formAction.formProcess"
       :loading="formAction.formProcess"
