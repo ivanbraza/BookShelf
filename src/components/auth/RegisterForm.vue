@@ -1,65 +1,68 @@
-
 <script setup>
 import { ref } from 'vue'
-import {
-  requiredValidator,
-  emailValidator,
-  passwordValidator,
-  confirmedValidator,
-} from '@/utils/validators'
+import { requiredValidator, emailValidator, passwordValidator, confirmedValidator } from '@/utils/validators'
+import AlertNotification from '@/components/common/AlertNotification.vue'
 import { supabase, formActionDefault } from '@/utils/supabase.js'
-import AlertNotification from '../common/AlertNotification.vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const isPasswordVisible = ref(false)
 const isPasswordConfirmVisible = ref(false)
 const refVForm = ref()
 
 const formDataDefault = {
-  firstname: '',
-  lastname: '',
-  email: '',
-  password: '',
-  password_confirmation: '',
-  role: '',
+firstnamed: '',
+lastname: '',
+email: '',
+password: '',
+roles: '',
+password_confirmation: '',
 }
 
 const formData = ref({
-  ...formDataDefault,
+  ...formDataDefault
 })
-
 const formAction = ref({
-  ...formActionDefault,
+  ...formActionDefault
 })
 
+// Register Functionality
 const onSubmit = async () => {
-  formAction.value = { ...formActionDefault }
-  formAction.value.formProcess = true
+  // Reset Form Action utils
+  formAction.value = { ...formActionDefault, formProcess: true }
 
   const { data, error } = await supabase.auth.signUp({
     email: formData.value.email,
     password: formData.value.password,
     options: {
       data: {
-        first_name: formData.value.firstname,
+        firstname: formData.value.firstname,
         lastname: formData.value.lastname,
-        role: formData.value.role,
-      },
-    },
+        is_admin: false // Just turn to true if super admin account
+        // role: 'Administrator' // If role based; just change the string based on role
+      }
+    }
   })
 
   if (error) {
-    console.log(error)
+    // Add Error Message and Status Code
     formAction.value.formErrorMessage = error.message
     formAction.value.formStatus = error.status
   } else if (data) {
-    console.log(data)
+    // Add Success Message
     formAction.value.formSuccessMessage = 'Successfully Registered Account.'
-    // Reset form fields after successful registration
-    refVForm.value?.reset()
+    // Redirect Acct to Dashboard
+    router.replace('/dashboard')
   }
 
+  // Reset Form
+  refVForm.value?.reset()
+  // Turn off processing
   formAction.value.formProcess = false
 }
+
+// Trigger Validators
 const onFormSubmit = () => {
   refVForm.value?.validate().then(({ valid }) => {
     if (valid) onSubmit()
