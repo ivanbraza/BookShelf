@@ -49,12 +49,33 @@ watch(mobile, (isMobile) => {
 
         <!-- Navigation Links -->
         <v-list density="compact" nav>
-          <v-divider></v-divider>
-          <v-list-item class="mt-8 nav-title black-text" prepend-icon="mdi-home" title="Home"></v-list-item>
-          <v-list-item class="mt-6 nav-title black-text" prepend-icon="mdi-bookshelf" title="Books"></v-list-item>
-          <v-list-item class="mt-6 nav-title black-text" prepend-icon="mdi-account-credit-card" title="Transaction"></v-list-item>
-          <v-list-item class="mt-6 nav-title black-text" prepend-icon="mdi-information" title="About"></v-list-item>
+        <v-divider></v-divider>
+        <v-list-item
+        class="mt-8 nav-title black-text"
+        prepend-icon="mdi-home"
+        title="Home"
+        @click="drawer = mobile ? false : drawer; $router.push('/')"
+        ></v-list-item>
+        <v-list-item
+        class="mt-6 nav-title black-text"
+        prepend-icon="mdi-bookshelf"
+        title="Books"
+        @click="drawer = mobile ? false : drawer; $router.push('/books')"
+        ></v-list-item>
+        <v-list-item
+        class="mt-6 nav-title black-text"
+        prepend-icon="mdi-account-credit-card"
+        title="Transaction"
+        @click="drawer = mobile ? false : drawer; $router.push('/transaction')"
+        ></v-list-item>
+        <v-list-item
+        class="mt-6 nav-title black-text"
+        prepend-icon="mdi-information"
+        title="About"
+        @click="drawer = mobile ? false : drawer; $router.push('/about')"
+        ></v-list-item>
         </v-list>
+
       </v-navigation-drawer>
 
       <!-- Main Content -->
@@ -75,7 +96,8 @@ watch(mobile, (isMobile) => {
             <v-row>
               <v-col cols="6">
                 <router-link to="/borrow-info" class="no-underline">
-                  <v-card class="mx-auto mt-auto" elevation="4" height="50" max-width="500" prepend-icon="mdi-book-check" title="How to borrow/reserve a book?">
+                  <v-card class="mx-auto mt-auto" elevation="4" height="50" max-width="500" prepend-icon="mdi-book-check" title="How to borrow/reserve a book?" @click="drawer = false; $router.push('/books')">
+                    
                   </v-card>
                 </router-link>
               </v-col>
