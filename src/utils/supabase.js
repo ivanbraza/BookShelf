@@ -13,3 +13,25 @@ export const formActionDefault = {
     formErrorMessage: '',
     formSuccessMessage: ''
 }
+
+export const isAuthenticated = async () => {
+  const { data, error } = await supabase.auth.getSession()
+
+  if (error) {
+    console.error('Error getting session:', error.message)
+    return false
+  }
+
+  return !!data.session
+}
+
+export const getUserInformation = async () => {
+  const { data, error } = await supabase.auth.getUser()
+
+  if (error || !data || !data.user) {
+    console.error('Error getting user information:', error ? error.message : 'No user data')
+    return null // Return null or some default value when there's no user
+  }
+
+  return data.user.user_metadata
+}
