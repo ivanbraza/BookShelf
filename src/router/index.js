@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '@/views/auth/LoginView.vue'
 import DashboardView from '@/views/system/DashboardView.vue'
 import BooksView from '@/views/system/BooksView.vue'
-// import TransactionView from '@/views/system/TransactionView.vue'
+import Transactionsview from '@/views/system/Transactionsview.vue'
 import RegisterVue from '@/views/auth/RegisterVue.vue'
 import { getUserInformation, isAuthenticated } from '@/utils/supabase'
 
@@ -35,12 +35,12 @@ const router = createRouter({
       component: BooksView,
       meta: { requiresAuth: true }
     },
-    // {
-    //   path: '/transactions',
-    //   name: 'transactions',
-    //   component: TransactionView,
-    //   meta: { requiresAuth: true }
-    // },
+    {
+      path: '/transactions',
+      name: 'transactions',
+      component: Transactionsview,
+      meta: { requiresAuth: true }
+    },
   ]
 })
 

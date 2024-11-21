@@ -41,8 +41,8 @@ const datePickerDialog = ref(false) // Controls the date picker dialog visibilit
 <template>
   <v-app>
     <!-- App Bar -->
-    <v-app-bar elevation="8" style="background-color: #232D3F;">
-      <v-btn v-if="mobile" icon @click="drawer = !drawer" aria-label="Toggle Navigation Drawer">
+    <v-app-bar class="app-bar" elevation="4" style="background-color: #232D3F;">
+      <v-btn v-if="mobile" icon @click="drawer = !drawer" >
         <v-icon>mdi-menu</v-icon>
       </v-btn>
       <v-spacer></v-spacer>
@@ -61,7 +61,6 @@ const datePickerDialog = ref(false) // Controls the date picker dialog visibilit
       :permanent="!mobile"
       fixed
       clipped
-      app
       style="background-color: #E7F0DC"
     >
       <template v-slot:prepend>
@@ -74,15 +73,38 @@ const datePickerDialog = ref(false) // Controls the date picker dialog visibilit
         ></v-list-item>
       </template>
 
-      <!-- Navigation Links -->
-      <v-list dense nav>
+        <!-- Navigation Links -->
+        <v-list density="compact" nav>
         <v-divider></v-divider>
-        <v-list-item prepend-icon="mdi-home" title="Home" class="nav-title black-text"></v-list-item>
-        <v-list-item prepend-icon="mdi-bookshelf" title="Books" class="nav-title black-text"></v-list-item>
-        <v-list-item prepend-icon="mdi-account-credit-card" title="Transaction" class="nav-title black-text"></v-list-item>
-        <v-list-item prepend-icon="mdi-cog" title="Settings" class="nav-title black-text"></v-list-item>
-      </v-list>
-    </v-navigation-drawer>
+        <v-list-item
+        class="mt-8 nav-title black-text"
+        prepend-icon="mdi-home"
+        title="Home"
+        @click="drawer = mobile ? false : drawer; $router.push('/')"
+        ></v-list-item>
+        <v-list-item
+        class="mt-6 nav-title black-text"
+        prepend-icon="mdi-bookshelf"
+        title="Books"
+        @click="drawer = mobile ? false : drawer; $router.push('/books')"
+        ></v-list-item>
+        <v-list-item
+        class="mt-6 nav-title black-text"
+        prepend-icon="mdi-account-credit-card"
+        title="Transaction"
+        @click="drawer = mobile ? false : drawer; $router.push('/transaction')"
+        ></v-list-item>
+        <v-list-item
+        class="mt-6 nav-title black-text"
+        prepend-icon="mdi-information"
+        title="About"
+        @click="drawer = mobile ? false : drawer; $router.push('/about')"
+        ></v-list-item>
+        </v-list>
+
+      </v-navigation-drawer>
+
+    
 
     <!-- Main Content -->
     <v-main style="background-color:#D8E3E7; height: 100%;">
@@ -156,3 +178,16 @@ const datePickerDialog = ref(false) // Controls the date picker dialog visibilit
     </v-footer>
   </v-app>
 </template>
+
+<style scoped>
+.app-bar {
+  z-index: 1000;
+}
+
+.nav-title {
+  font-family: 'Merriweather', serif;
+  font-size: 1.4rem;
+  font-weight: 500;
+  margin: 0;
+}
+</style>
