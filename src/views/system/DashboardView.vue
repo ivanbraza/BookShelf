@@ -71,7 +71,7 @@
       <v-main class="content-area bg-3 particle-overlay">
         <v-row justify="center" align="center">
           <v-col cols="10" class="mt-4">
-            <v-img src="/images/OpenHours.png"></v-img>
+            <v-img src="/images/OpenHour.png"></v-img>
           </v-col>
 
           <!-- Router-Link Cards -->
