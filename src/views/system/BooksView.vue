@@ -1,10 +1,18 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useDisplay } from 'vuetify'
+import LogoutModal from '../auth/LogoutModal.vue';
 
 // Vuetify's display composable for mobile detection
 const { mobile } = useDisplay()
 const drawer = ref(!mobile.value)
+
+// Logout modal reference
+const logoutModalRef = ref(null);
+const openLogoutModal = () => {
+  logoutModalRef.value?.open();
+};
+
 
 watch(mobile, (isMobile) => {
   drawer.value = !isMobile
@@ -100,6 +108,13 @@ const datePickerDialog = ref(false) // Controls the date picker dialog visibilit
         title="About"
         @click="drawer = mobile ? false : drawer; $router.push('/about')"
         ></v-list-item>
+         <!-- Logout Link -->
+         <v-list-item
+            class="mt-6 nav-title black-text"
+            prepend-icon="mdi-logout"
+            title="Logout"
+            @click="openLogoutModal"
+          ></v-list-item>
         </v-list>
 
       </v-navigation-drawer>
@@ -176,6 +191,10 @@ const datePickerDialog = ref(false) // Controls the date picker dialog visibilit
         <v-col class="text-right py-2" style="color: wheat;">2024 - Book Shelf</v-col>
       </v-row>
     </v-footer>
+
+    <!-- Logout Modal -->
+    <LogoutModal ref="logoutModalRef" />
+
   </v-app>
 </template>
 
@@ -189,5 +208,9 @@ const datePickerDialog = ref(false) // Controls the date picker dialog visibilit
   font-size: 1.4rem;
   font-weight: 500;
   margin: 0;
+}
+
+.bg-3 {
+  background-color: rgb(77, 127, 255)
 }
 </style>
