@@ -1,7 +1,8 @@
 <script setup>
-import { ref, watch } from 'vue'
-import { useDisplay } from 'vuetify'
+import { ref, watch, onMounted } from 'vue';
+import { useDisplay } from 'vuetify';
 import LogoutModal from '../auth/LogoutModal.vue';
+import { supabase } from '@/utils/supabase';
 
 // Vuetify's display composable for mobile detection
 const { mobile } = useDisplay()
@@ -44,6 +45,47 @@ function openForm() {
 
 const selectedDate = ref(null)
 const datePickerDialog = ref(false) // Controls the date picker dialog visibility
+
+
+// Reactive variables
+const firstName = ref('');
+const lastName = ref('');
+
+// Fetch user information
+async function getUserInformation() {
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error) {
+    console.error('Error fetching user information:', error.message);
+    return null;
+  }
+
+  if (data.user) {
+    const { user } = data;
+    console.log('Fetched user data:', user);
+    return {
+      firstname: user.user_metadata.firstname || 'Guest',
+      lastname: user.user_metadata.lastname || 'User',
+    };
+  } else {
+    console.warn('No user data found.');
+    return null;
+  }
+}
+
+// Lifecycle hook
+onMounted(async () => {
+  const user = await getUserInformation();
+  if (user) {
+    firstName.value = user.firstname;
+    lastName.value = user.lastname;
+    console.log('User data set:', { firstName: firstName.value, lastName: lastName.value });
+  } else {
+    console.error('User not logged in or data not found.');
+  }
+});
+
+
 </script>
 
 <template>
@@ -77,7 +119,7 @@ const datePickerDialog = ref(false) // Controls the date picker dialog visibilit
           lines="two"
           prepend-avatar="https://randomuser.me/api/portraits/women/81.jpg"
           subtitle="Logged in"
-          title="Jane Smith"
+          :title="`${firstName || '...'} ${lastName || '...'}`"
         ></v-list-item>
       </template>
 
@@ -88,7 +130,7 @@ const datePickerDialog = ref(false) // Controls the date picker dialog visibilit
         class="mt-8 nav-title black-text"
         prepend-icon="mdi-home"
         title="Home"
-        @click="drawer = mobile ? false : drawer; $router.push('/')"
+        @click="drawer = mobile ? false : drawer; $router.push('/dashboard')"
         ></v-list-item>
         <v-list-item
         class="mt-6 nav-title black-text"
@@ -101,12 +143,6 @@ const datePickerDialog = ref(false) // Controls the date picker dialog visibilit
         prepend-icon="mdi-account-credit-card"
         title="Transaction"
         @click="drawer = mobile ? false : drawer; $router.push('/transaction')"
-        ></v-list-item>
-        <v-list-item
-        class="mt-6 nav-title black-text"
-        prepend-icon="mdi-information"
-        title="About"
-        @click="drawer = mobile ? false : drawer; $router.push('/about')"
         ></v-list-item>
          <!-- Logout Link -->
          <v-list-item

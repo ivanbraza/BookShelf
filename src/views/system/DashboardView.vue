@@ -13,7 +13,7 @@
 
     <!-- Main Layout -->
     <v-row class="main-container">
-      <!-- Sidebar Navigation Drawer -->
+      <!-- Sidebar Navigation Drawer --> 
       <v-navigation-drawer
         v-model="drawer"
         :temporary="mobile"
@@ -27,7 +27,7 @@
             lines="two"
             prepend-avatar="https://randomuser.me/api/portraits/women/81.jpg"
             subtitle="Logged in"
-            title="Jane Smith"
+            :title="`${firstName || '...'} ${lastName || '...'}`"
           ></v-list-item>
         </template>
 
@@ -38,7 +38,7 @@
             class="mt-8 nav-title black-text"
             prepend-icon="mdi-home"
             title="Home"
-            @click="drawer = mobile ? false : drawer; $router.push('/')"
+            @click="drawer = mobile ? false : drawer; $router.push('/dashboard')"
           ></v-list-item>
           <v-list-item
             class="mt-6 nav-title black-text"
@@ -52,12 +52,7 @@
             title="Transaction"
             @click="drawer = mobile ? false : drawer; $router.push('/transaction')"
           ></v-list-item>
-          <v-list-item
-            class="mt-6 nav-title black-text"
-            prepend-icon="mdi-information"
-            title="About"
-            @click="drawer = mobile ? false : drawer; $router.push('/about')"
-          ></v-list-item>
+          
           <!-- Logout Link -->
           <v-list-item
             class="mt-6 nav-title black-text"
@@ -71,97 +66,289 @@
       <!-- Main Content -->
       <v-main class="content-area bg-3 particle-overlay">
         <v-row justify="center" align="center">
-          <v-col cols="10" class="mt-4">
-            <v-img src="/images/OpenHour.png"></v-img>
+          <v-col cols="11" class="mt-9">
+             <!-- Blurred Background Section -->
+        <div class="blurred-background">
+          <!-- Blurred Background Image -->
+          <div class="background-image"></div>
+
+          <!-- Text Overlay (No blur) -->
+          <div class="blurred-overlay">
+            <h1 class="title">Welcome to BookShelf</h1>
+            <p class="subtitle">
+              "Reserve, Borrow, and Pick Up: Your Books, Your Way – Anytime, Anywhere."
+            </p>
+          </div>
+        </div>
           </v-col>
 
-          <!-- Router-Link Cards -->
-          <v-col cols="11" class="mx-auto my-auto py-10">
-            <v-row>
-              <v-col cols="6">
-                <router-link to="/borrow-info" class="no-underline">
-                  <v-card
-                    class="mx-auto mt-auto"
-                    elevation="4"
-                    height="50"
-                    max-width="500"
-                    prepend-icon="mdi-book-check"
-                    title="How to borrow/reserve a book?"
-                    @click="drawer = false; $router.push('/books')"
-                    style="background-color: transparent; border: 2px solid #000000; box-shadow: none;"
-                  ></v-card>
-                </router-link>
-              </v-col>
+          <v-col cols="12" sm="6" class="mb-auto">
+  <router-link to="/borrow-info" class="no-underline">
+    <v-card
+      class="card-hover mx-auto mt-auto"
+      elevation="4"
+      height="50"
+      max-width="370"
+      prepend-icon="mdi-book-check"
+      title="How to borrow/reserve a book?"
+      @click="drawer = false; $router.push('/books')"
+      style="background-color: #ffffff; border: 2px solid #000000; box-shadow: none;"
+    ></v-card>
+  </router-link>
+</v-col>
 
-              <v-col cols="6">
-                <router-link to="/register" class="no-underline">
-                  <v-card
-                    class="mx-auto mt-auto"
-                    elevation="4"
-                    height="50"
-                    max-width="500"
-                    prepend-icon="mdi-alert-octagon"
-                    title="Penalty for late returned book/s?"
-                    style="background-color: transparent; border: 2px solid  #232D3F; box-shadow: none;"
-                  ></v-card>
-                </router-link>
-              </v-col>
-            </v-row>
+<v-col cols="12" sm="6" class="mb-auto">
+  <router-link to="/register" class="no-underline">
+    <v-card
+      class="card-hover mx-auto mt-auto"
+      elevation="4"
+      height="50"
+      max-width="370"
+      prepend-icon="mdi-alert-octagon"
+      title="Penalty for late returned book/s?"
+      style="background-color: #ffffff; border: 2px solid #232D3F; box-shadow: none;"
+    ></v-card>
+  </router-link>
+</v-col>
 
-            <v-row>
-              <v-col cols="6">
-                <router-link to="/library-hours" class="no-underline">
-                  <v-card
-                    class="mx-auto mt-auto"
-                    elevation="4"
-                    height="50"
-                    max-width="500"
-                    prepend-icon="mdi-clock"
-                    title="Library Hours"
-                    style="background-color: transparent; border: 2px solid #232D3F; box-shadow: none;"
-                  ></v-card>
-                </router-link>
-              </v-col>
-              <v-col cols="6">
-                <router-link to="/services" class="no-underline">
-                  <v-card
-                    class="mx-auto mt-auto"
-                    elevation="4"
-                    height="50"
-                    max-width="500"
-                    prepend-icon="mdi-hand-coin"
-                    title="Services"
-                    style="background-color: transparent; border: 2px solid #232D3F; box-shadow: none;"
-                  ></v-card>
-                </router-link>
-              </v-col>
-            </v-row>
-          </v-col>
+<v-col cols="12" sm="6">
+  <router-link to="/library-hours" class="no-underline">
+    <v-card
+      class="card-hover mx-auto mt-auto" 
+      elevation="4"
+      height="50"
+      max-width="370"
+      prepend-icon="mdi-clock"
+      title="Library Hours"
+      style="background-color: #ffffff; border: 2px solid #232D3F; box-shadow: none;"
+    ></v-card>
+  </router-link>
+</v-col>
 
-          <!-- Additional Content -->
-          <v-row class="mx-auto my-auto bg-3 py-16">
-            <v-col class="pl-16 pr-16" cols="12">
-              <h1>How to Borrow or Reserve Books?</h1>
-              <h3>
-                At <b>BookShelf</b>, borrowing books is simple! Follow these steps:
-              </h3>
-              <v-row>
-                <v-col cols="12" sm="4">
-                  <h4>Browse Our Collection:</h4>
-                  <p>Search for your desired book through our online catalog.</p>
-                </v-col>
-                <v-col cols="12" sm="4">
-                  <h4>Reserve a Book:</h4>
-                  <p>If the book is currently unavailable, you can place a hold.</p>
-                </v-col>
-                <v-col cols="12" sm="4">
-                  <h4>Pick Up Your Book:</h4>
-                  <p>Once your book is available, you will be notified to pick it up from our library.</p>
-                </v-col>
-              </v-row>
-              <p>Don’t forget to bring your school ID when you come to check out your books!</p>
-            </v-col>
-          </v-row>
+<v-col cols="12" sm="6">
+  <router-link to="/services" class="no-underline">
+    <v-card
+      class="card-hover mx-auto mt-auto"
+      elevation="4"
+      height="50"
+      max-width="370"
+      prepend-icon="mdi-hand-coin"
+      title="Services"
+      style="background-color: #ffffff; border: 2px solid #232D3F; box-shadow: none;"
+    ></v-card>
+  </router-link>
+</v-col>
+
+
+          <!--How to borrow books section-->
+      <v-row class="mx-auto my-auto bg-4 py-16">
+      <v-col class="pl-16 pr-16" cols="12">
+      <h1 class="text-center text-primary display-1 font-weight-bold mb-6">
+        <v-icon class="mr-2" size="32">mdi-book-check</v-icon>
+        How to Borrow or Reserve Books?</h1>
+      <h3 class="text-center font-weight-medium mb-8">
+        At <b class>BookShelf</b>, borrowing books is simple! Follow these steps:
+      </h3>
+
+      <v-row>
+        <v-col cols="12" sm="4" class="py-4">
+          <v-card
+            class="hover-card"
+            elevation="3"
+            outlined
+            style="background-color: #E7F0DC;"
+          >
+            <v-card-text class="text-center d-flex flex-column align-center">
+              <v-icon color="primary" size="48" class="mb-4">mdi-book-open-page-variant</v-icon>
+              <h4 class="font-weight-bold">Browse Our Collection</h4>
+              <p class>Search for your desired book in the books section and check for its availability.</p>
+            </v-card-text>
+          </v-card>
+        </v-col>
+
+        <v-col cols="12" sm="4" class="py-4">
+          <v-card
+            class="hover-card"
+            elevation="3"
+            outlined
+            style="background-color: #E7F0DC;"
+          >
+            <v-card-text class="text-center d-flex flex-column align-center">
+              <v-icon color="primary" size="48" class="mb-4">mdi-calendar-check</v-icon>
+              <h4 class="font-weight-bold">Reserve a Book</h4>
+              <p>If the book is currently unavailable, you can place a hold.</p>
+            </v-card-text>
+          </v-card>
+        </v-col>
+
+        <v-col cols="12" sm="4" class="py-4">
+          <v-card
+            class="hover-card"
+            elevation="3"
+            outlined
+            style="background-color: #E7F0DC;"
+          >
+            <v-card-text class="text-center d-flex flex-column align-center">
+              <v-icon color="primary" size="48" class="mb-4">mdi-library-shelves</v-icon>
+              <h4 class="font-weight-bold">Pick Up Your Book</h4>
+              <p class>Once your book is available, you will be notified to pick it up from our library.</p>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+
+      <p 
+        class="text-center mt-6 text-red pa-4" 
+        style="background-color: #FFE5E5; border-radius: 8px; border: 1px solid #FFCCCC;"
+      >
+        <b>Note:</b> Don’t forget to bring your school ID when you come to check out your books!
+      </p>
+    </v-col>
+  </v-row>
+
+
+
+
+    <!--Penalty Section-->
+<v-row class="mx-auto my-auto py-16 px-8 card-hover" align="center" style="background-color:  #D8E3E7; border-radius: 8px;">
+  <!-- Column for Image -->
+  <v-col cols="12" md="6" class="d-flex justify-center">
+    <v-img 
+      src="/public/images/penaltyimg.png" 
+      alt="Penalty Image" 
+      max-width="400px" 
+      class="rounded-lg shadow-md hover:scale-105 transition-transform"
+    />
+  </v-col>
+
+  <!-- Column for Text -->
+  <v-col cols="12" md="6" class="px-8">
+    <h1 class="text-start text-red font-weight-bold mb-4">
+      <v-icon class="mr-2" size="32">mdi-alert-octagon</v-icon>
+      Penalty for Late Returned Books
+    </h1>
+
+    <h2 class="text-start text-dark font-weight-medium mb-6" style="line-height: 1.5;">
+      We understand that life can get busy, but it's important to return books on time so everyone can enjoy them. Here's our penalty policy for overdue books:
+    </h2>
+
+    <!-- Penalty Policy Cards -->
+    <v-row class="g-4">
+      <v-col cols="12" sm="4">
+        <v-card elevation="3" class="pa-4 text-center rounded-lg" style="background-color: #FFFFFF;">
+          <h3 class="font-weight-bold text-primary">1–7 days late</h3>
+          <p class="mt-2"><br>₱10 per day</p>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" sm="4">
+        <v-card elevation="3" class="pa-4 text-center rounded-lg d-flex flex-column" style="background-color: #FFFFFF;">
+          <h3 class="font-weight-bold text-primary">8–14 days late</h3>
+          <p class="mt-2"><br>₱15 per day</p>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" sm="4">
+        <v-card elevation="3" class="pa-4 text-center rounded-lg d-flex flex-column" style="background-color: #FFFFFF;">
+          <h3 class="font-weight-bold text-primary">15+ days late</h3>
+          <p class="mt-2">
+            You will be blocked <br>until the fine is paid
+          </p>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <p  class="text-center mt-6 text-red pa-4" 
+    style="background-color: #FFE5E5; border-radius: 8px; border: 1px solid #FFCCCC;">
+      Please remember to return or renew your books before the due date!
+    </p>
+  </v-col>
+</v-row>
+
+
+
+
+<!--Services Section-->
+
+
+<v-row class="mx-auto my-auto bg-4 py-16">
+  <v-col class="pl-16 pr-16" cols="12">    
+
+    <h1 class="text-center text-primary display-1 font-weight-bold mb-6">
+        <v-icon class="mr-2" size="34">mdi-hand-coin</v-icon>
+       Services</h1>
+      <h3 class="text-center font-weight-medium mb-8">
+      <b class>BookShelf</b> provides the following services:
+      </h3>
+
+    <v-container>
+    <v-row>
+      <!-- Card 1 -->
+      <v-col cols="12" sm="4">
+        <v-card class="text-center pa-4 hover-card" style="background-color: #E7F0DC;">
+          <v-img src="/public/images/LaptopArea.jpg" max-height="145"></v-img>
+          <h3 class="font-weight-bold mt-2">Laptop Area</h3>
+          <p>this service allow clients to plug their laptops on designated area.</p>
+        </v-card>
+      </v-col>
+
+      <!-- Card 2 -->
+      <v-col cols="12" sm="4">
+        <v-card class="text-center pa-4 hover-card" style="background-color: #E7F0DC;">
+          <v-img src="/public/images/LibraryOrientation.png"></v-img>
+          <h3 class="font-weight-bold mt-2">Library Orientation</h3>
+          <p>Provides a good understanding of the library's objectives, facilities, resources and services.</p>
+        </v-card>
+      </v-col>
+
+      <!-- Card 3 -->
+      <v-col cols="12" sm="4">
+        <v-card class="text-center pa-4 hover-card" style="background-color: #E7F0DC;">
+          <v-img src="/public/images/BibliographicAssistance.jpg" max-height="145"></v-img>
+          <h3 class="font-weight-bold mt-2">Bibliographic Assistance</h3>
+          <p>Librarians prepare bibliographies on certain subjects upon request by students and faculty.</p>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+
+  <v-container>
+    <v-row>
+      <!-- Card 4 -->
+      <v-col cols="12" sm="4">
+        <v-card class="text-center pa-4 hover-card" style="background-color: #E7F0DC;">
+          <v-img src="/public/images/LaptopArea.jpg" max-height="145"></v-img>
+          <h3 class="font-weight-bold mt-2">Audio Visual Room</h3>
+          <p>For viewing and borrowing of digital interactive CDs and DVDs.</p>
+        </v-card>
+      </v-col>
+
+      <!-- Card 5 -->
+      <v-col cols="12" sm="4">
+        <v-card class="text-center pa-4 hover-card" style="background-color: #E7F0DC;">
+          <v-img src="/public/images/LibraryOrientation.png"></v-img>
+          <h3 class="font-weight-bold mt-2">Library Orientation</h3>
+          <p>Provides a good understanding of the library's objectives, facilities, resources and services.</p>
+        </v-card>
+      </v-col>
+
+      <!-- Card 6 -->
+      <v-col cols="12" sm="4">
+        <v-card class="text-center pa-4 hover-card" style="background-color: #E7F0DC;">
+          <v-img src="/public/images/BibliographicAssistance.jpg" max-height="145"></v-img>
+          <h3 class="font-weight-bold mt-2">One-stop trading solution</h3>
+          <p>Order seamlessly from product/supplier search to order management, payment, and fulfillment.</p>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+
+
+
+  </v-col>
+</v-row>
+
+
         </v-row>
       </v-main>
     </v-row>
@@ -181,9 +368,10 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useDisplay } from 'vuetify';
 import LogoutModal from '../auth/LogoutModal.vue';
+import { supabase } from '@/utils/supabase';
 
 // Mobile detection from Vuetify's display composable
 const { mobile } = useDisplay();
@@ -201,14 +389,61 @@ watch(mobile, (isMobile) => {
     drawer.value = true;
   }
 });
+
+
+// Reactive variables
+const firstName = ref('');
+const lastName = ref('');
+
+// Fetch user information
+async function getUserInformation() {
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error) {
+    console.error('Error fetching user information:', error.message);
+    return null;
+  }
+
+  if (data.user) {
+    const { user } = data;
+    console.log('Fetched user data:', user);
+    return {
+      firstname: user.user_metadata.firstname || 'Guest',
+      lastname: user.user_metadata.lastname || 'User',
+    };
+  } else {
+    console.warn('No user data found.');
+    return null;
+  }
+}
+
+// Lifecycle hook
+onMounted(async () => {
+  const user = await getUserInformation();
+  if (user) {
+    firstName.value = user.firstname;
+    lastName.value = user.lastname;
+    console.log('User data set:', { firstName: firstName.value, lastName: lastName.value });
+  } else {
+    console.error('User not logged in or data not found.');
+  }
+});
+
+
 </script>
 
 <style scoped>
-/* Keep the entire original styling */
-</style>
 
+/* Hover effect on cards */
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
-<style scoped>
+.card-hover:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
 .app-bar {
   z-index: 1000;
 }
@@ -233,13 +468,10 @@ watch(mobile, (isMobile) => {
   background-color: #232D3F;
 }
 
-.bg-2 {
-  background-color: rgb(73, 2, 2);
+.bg-4 {
+  background-color: #ffffff;
 }
 
-.bg-3 {
-  background-color: rgb(77, 127, 255)
-}
 
 .black-text {
   color: black;
@@ -277,6 +509,102 @@ watch(mobile, (isMobile) => {
   background-size: 300% 300%;
   animation: gradient-wave 7s ease infinite;
 }
+
+.v-col:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease-in-out;
+}
+
+.v-col:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease-in-out;
+} 
+
+.text-center {
+  text-align: center;
+}
+
+.hover-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Blurred Background Section */
+.blurred-background {
+  position: relative;
+  width: 100%;
+  height: 60vh; /* Set the height to 60% of the viewport height for responsiveness */
+  overflow: hidden; /* Prevent any elements from overflowing */
+}
+
+.background-image {
+  background-image: url('/public/images/libraryimg.webp');
+  background-size: cover;
+  background-position: center;
+  filter: blur(3px); /* Increased blur for better background separation */
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.blurred-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  text-align: center;
+  z-index: 1;
+  width: 90%; /* Ensure the overlay text has space on mobile */
+  max-width: 600px; /* Limit max width on larger screens */
+  padding: 10px; /* Extra padding for a more spacious look */
+}
+
+/* Title Text */
+.title {
+  font-size: 3.3rem; /* Larger font size */
+  font-weight: 790; /* Increased weight for better visibility */
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7); /* Darker shadow for greater contrast */
+  color: #E7F0DC;
+  line-height: 1.3; /* Adjust line height for more breathing room */
+}
+
+/* Subtitle Text */
+.subtitle {
+  font-size: 1.8rem; /* Larger subtitle */
+  line-height: 1.6; /* Better line spacing */
+  font-weight: 400; /* Normal weight */
+  color: #E7F0DC;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Adding shadow for subtitle as well */
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Make sure the overlay text remains readable on mobile */
+@media (max-width: 600px) {
+  .blurred-overlay {
+    padding: 15px; /* Less padding on small screens */
+  }
+
+  .title {
+    font-size: 2.5rem; /* Slightly smaller title on mobile */
+  }
+
+  .subtitle {
+    font-size: 1.4rem; /* Slightly smaller subtitle */
+  }
+
+
+}
+
 
 
 </style>
