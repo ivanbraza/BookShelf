@@ -77,7 +77,7 @@
     formAction.value.formProcess = false
     // Reset State
   
-    router.replace('/')
+    router.replace('/login')
   }
   
   // Expose the open function so the parent can call it
