@@ -83,7 +83,7 @@
           </v-col>
 
           <v-col cols="12" sm="6" class="mb-auto">
-  <router-link to="/borrow-info" class="no-underline">
+  <router-link to="#borrowing" class="no-underline">
     <v-card
       class="card-hover mx-auto mt-auto"
       elevation="4"
@@ -91,14 +91,13 @@
       max-width="370"
       prepend-icon="mdi-book-check"
       title="How to borrow/reserve a book?"
-      @click="drawer = false; $router.push('/books')"
       style="background-color: #ffffff; border: 2px solid #000000; box-shadow: none;"
     ></v-card>
   </router-link>
 </v-col>
 
 <v-col cols="12" sm="6" class="mb-auto">
-  <router-link to="/register" class="no-underline">
+  <router-link to="#penalty" class="no-underline">
     <v-card
       class="card-hover mx-auto mt-auto"
       elevation="4"
@@ -112,7 +111,7 @@
 </v-col>
 
 <v-col cols="12" sm="6">
-  <router-link to="/library-hours" class="no-underline">
+  <router-link to="#libraryhours" class="no-underline">
     <v-card
       class="card-hover mx-auto mt-auto" 
       elevation="4"
@@ -126,7 +125,7 @@
 </v-col>
 
 <v-col cols="12" sm="6">
-  <router-link to="/services" class="no-underline">
+  <router-link to="#services" class="no-underline">
     <v-card
       class="card-hover mx-auto mt-auto"
       elevation="4"
@@ -141,7 +140,7 @@
 
 
           <!--How to borrow books section-->
-      <v-row class="mx-auto my-auto bg-4 py-16">
+      <v-row class="mx-auto my-auto bg-4 py-16" id="borrowing">
       <v-col class="pl-16 pr-16" cols="12">
       <h1 class="text-center text-primary display-1 font-weight-bold mb-6">
         <v-icon class="mr-2" size="32">mdi-book-check</v-icon>
@@ -210,7 +209,7 @@
 
 
     <!--Penalty Section-->
-<v-row class="mx-auto my-auto py-16 px-8 card-hover" align="center" style="background-color:  #D8E3E7; border-radius: 8px;">
+<v-row class="mx-auto my-auto py-16 px-8 card-hover" align="center" style="background-color:  #D8E3E7; border-radius: 8px;" id="penalty">
   <!-- Column for Image -->
   <v-col cols="12" md="6" class="d-flex justify-center">
     <v-img 
@@ -266,15 +265,35 @@
 </v-row>
 
 
+<!--Library Hours Section-->
+
+<v-row class="mx-auto my-auto bg-4 py-16" id="libraryhours">
+  <v-col class="pl-16 pr-16" cols="12">    
+
+    <h1 class="text-center text-secondary display-1 font-weight-bold mb-6">
+        <v-icon class="mr-2" size="34">mdi-clock</v-icon>
+       Library Hours</h1>
+      <h3 class="text-center font-weight-medium mb-8">
+      Our libary is here to provide you with resources, knowledge, and a space to learn.<br> The library is open during the following hours.
+      </h3>
+    
+      <v-container>
+        <v-img src="/public/images/OpenHours (1).png"></v-img>
+      </v-container>
+
+
+  </v-col>
+</v-row>
+
 
 
 <!--Services Section-->
 
 
-<v-row class="mx-auto my-auto bg-4 py-16">
+<v-row class="mx-auto my-auto bg-4 py-16" id="services" style="background-color:  #D8E3E7; border-radius: 8px;">
   <v-col class="pl-16 pr-16" cols="12">    
 
-    <h1 class="text-center text-primary display-1 font-weight-bold mb-6">
+    <h1 class="text-center text-secondary  display-1 font-weight-bold mb-6">
         <v-icon class="mr-2" size="34">mdi-hand-coin</v-icon>
        Services</h1>
       <h3 class="text-center font-weight-medium mb-8">
@@ -285,7 +304,7 @@
     <v-row>
       <!-- Card 1 -->
       <v-col cols="12" sm="4">
-        <v-card class="text-center pa-4 hover-card" style="background-color: #E7F0DC;">
+        <v-card class="text-center pa-4 hover-card">
           <v-img src="/public/images/LaptopArea.jpg" max-height="145"></v-img>
           <h3 class="font-weight-bold mt-2">Laptop Area</h3>
           <p>this service allow clients to plug their laptops on designated area.</p>
@@ -294,7 +313,7 @@
 
       <!-- Card 2 -->
       <v-col cols="12" sm="4">
-        <v-card class="text-center pa-4 hover-card" style="background-color: #E7F0DC;">
+        <v-card class="text-center pa-4 hover-card">
           <v-img src="/public/images/LibraryOrientation.png"></v-img>
           <h3 class="font-weight-bold mt-2">Library Orientation</h3>
           <p>Provides a good understanding of the library's objectives, facilities, resources and services.</p>
@@ -303,7 +322,7 @@
 
       <!-- Card 3 -->
       <v-col cols="12" sm="4">
-        <v-card class="text-center pa-4 hover-card" style="background-color: #E7F0DC;">
+        <v-card class="text-center pa-4 hover-card">
           <v-img src="/public/images/BibliographicAssistance.jpg" max-height="145"></v-img>
           <h3 class="font-weight-bold mt-2">Bibliographic Assistance</h3>
           <p>Librarians prepare bibliographies on certain subjects upon request by students and faculty.</p>
@@ -316,7 +335,7 @@
     <v-row>
       <!-- Card 4 -->
       <v-col cols="12" sm="4">
-        <v-card class="text-center pa-4 hover-card" style="background-color: #E7F0DC;">
+        <v-card class="text-center pa-4 hover-card">
           <v-img src="/public/images/LaptopArea.jpg" max-height="145"></v-img>
           <h3 class="font-weight-bold mt-2">Audio Visual Room</h3>
           <p>For viewing and borrowing of digital interactive CDs and DVDs.</p>
@@ -325,7 +344,7 @@
 
       <!-- Card 5 -->
       <v-col cols="12" sm="4">
-        <v-card class="text-center pa-4 hover-card" style="background-color: #E7F0DC;">
+        <v-card class="text-center pa-4 hover-card">
           <v-img src="/public/images/LibraryOrientation.png"></v-img>
           <h3 class="font-weight-bold mt-2">Library Orientation</h3>
           <p>Provides a good understanding of the library's objectives, facilities, resources and services.</p>
@@ -334,7 +353,7 @@
 
       <!-- Card 6 -->
       <v-col cols="12" sm="4">
-        <v-card class="text-center pa-4 hover-card" style="background-color: #E7F0DC;">
+        <v-card class="text-center pa-4 hover-card">
           <v-img src="/public/images/BibliographicAssistance.jpg" max-height="145"></v-img>
           <h3 class="font-weight-bold mt-2">One-stop trading solution</h3>
           <p>Order seamlessly from product/supplier search to order management, payment, and fulfillment.</p>
