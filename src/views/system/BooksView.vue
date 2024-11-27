@@ -3,19 +3,17 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useDisplay } from 'vuetify';
 import axios from 'axios';
 import LogoutModal from '../auth/LogoutModal.vue';
+import { supabase } from '@/utils/supabase';
 
+// Reactive variables for user information
+const firstName = ref('');
+const lastName = ref('');
+
+// Reactive variables for mobile layout and drawer
 const { mobile } = useDisplay();
 const drawer = ref(!mobile.value);
 
-const logoutModalRef = ref(null);
-const openLogoutModal = () => {
-  logoutModalRef.value?.open();
-};
-
-watch(mobile, (isMobile) => {
-  drawer.value = !isMobile;
-});
-
+// Reactive variables for books
 const categories = [
   { name: 'Agriculture', subject: 'agriculture' },
   { name: 'Engineering', subject: 'engineering' },
@@ -24,13 +22,31 @@ const categories = [
   { name: 'Social Science', subject: 'social_science' },
   { name: 'Programming', subject: 'programming' },
 ];
-
 const tabs = ref(categories[0].subject);
 const cards = ref([]);
 const searchQuery = ref('');
 const loading = ref(false);
 const error = ref(null);
 
+// Reactive state for dialogs
+const dialog = ref(false);
+const selectedDate = ref(null);
+const datePickerDialog = ref(false);
+
+// Logout modal reference
+const logoutModalRef = ref(null);
+
+// Function to open logout modal
+const openLogoutModal = () => {
+  logoutModalRef.value?.open();
+};
+
+// Watch for mobile layout changes and adjust drawer visibility
+watch(mobile, (isMobile) => {
+  drawer.value = !isMobile;
+});
+
+// Function to fetch books from OpenLibrary API
 const fetchBooks = async (subject) => {
   loading.value = true;
   error.value = null;
@@ -52,24 +68,60 @@ const fetchBooks = async (subject) => {
   }
 };
 
+// Watch for tab changes to fetch books for the new category
 watch(tabs, fetchBooks);
 
+// Filter the cards based on search query
 const filteredCards = computed(() =>
   cards.value.filter((card) =>
     card.title.toLowerCase().includes(searchQuery.value.trim().toLowerCase())
   )
 );
 
-onMounted(() => fetchBooks(tabs.value));
+// Function to fetch user information
+async function getUserInformation() {
+  const { data, error } = await supabase.auth.getUser();
 
-const dialog = ref(false);
-const selectedDate = ref(null);
-const datePickerDialog = ref(false);
+  if (error) {
+    console.error('Error fetching user information:', error.message);
+    return null;
+  }
 
+  if (data.user) {
+    const { user } = data;
+    console.log('Fetched user data:', user);
+    return {
+      firstname: user.user_metadata.firstname || 'Guest',
+      lastname: user.user_metadata.lastname || 'User',
+    };
+  } else {
+    console.warn('No user data found.');
+    return null;
+  }
+}
+
+// Lifecycle hook to fetch both user and books data on mount
+onMounted(async () => {
+  // Fetch user information and set reactive variables
+  const user = await getUserInformation();
+  if (user) {
+    firstName.value = user.firstname;
+    lastName.value = user.lastname;
+    console.log('User data set:', { firstName: firstName.value, lastName: lastName.value });
+  } else {
+    console.error('User not logged in or data not found.');
+  }
+
+  // Fetch books for the default category (Agriculture)
+  await fetchBooks(tabs.value);
+});
+
+// Open form dialog
 const openForm = () => {
   dialog.value = true;
 };
 </script>
+
 
 <template>
   <v-app>
@@ -82,46 +134,55 @@ const openForm = () => {
       <v-img src="/images/logo2.png" class="mx-3 my-4" max-width="50px" alt="Logo"></v-img>
     </v-app-bar>
 
-    <!-- Sidebar Navigation Drawer -->
+    <!-- Sidebar Navigation Drawer --> 
     <v-navigation-drawer
-      v-model="drawer"
-      :temporary="mobile"
-      location="left"
-      :permanent="!mobile"
-      fixed
-      clipped
-      class="sidebar"
-    >
-      <template v-slot:prepend>
-        <v-list-item
-          lines="two"
-          prepend-avatar="https://randomuser.me/api/portraits/women/81.jpg"
-          subtitle="Logged in"
-          title="Jane Smith"
-        ></v-list-item>
-        <v-divider class="my-4"></v-divider>
-      </template>
-      <v-list nav>
-        <v-list-item
-          class="nav-title"
-          prepend-icon="mdi-home"
-          title="Home"
-          @click="$router.push('/')"
-        ></v-list-item>
-        <v-list-item
-          class="nav-title"
-          prepend-icon="mdi-bookshelf"
-          title="Books"
-          @click="$router.push('/books')"
-        ></v-list-item>
-        <v-list-item
-          class="nav-title"
-          prepend-icon="mdi-logout"
-          title="Logout"
-          @click="openLogoutModal"
-        ></v-list-item>
-      </v-list>
-    </v-navigation-drawer>
+        v-model="drawer"
+        :temporary="mobile"
+        location="left"
+        :permanent="!mobile"
+        style="background-color: #E7F0DC"
+      >
+        <template v-slot:prepend>
+          <v-divider></v-divider>
+          <v-list-item
+            lines="two"
+            prepend-avatar="https://randomuser.me/api/portraits/women/81.jpg"
+            subtitle="Logged in"
+            :title="`${firstName || '...'} ${lastName || '...'}`"
+          ></v-list-item>
+        </template>
+
+        <!-- Navigation Links -->
+        <v-list density="compact" nav>
+          <v-divider></v-divider>
+          <v-list-item
+            class="mt-8 nav-title black-text"
+            prepend-icon="mdi-home"
+            title="Home"
+            @click="drawer = mobile ? false : drawer; $router.push('/dashboard')"
+          ></v-list-item>
+          <v-list-item
+            class="mt-6 nav-title black-text"
+            prepend-icon="mdi-bookshelf"
+            title="Books"
+            @click="drawer = mobile ? false : drawer; $router.push('/books')"
+          ></v-list-item>
+          <v-list-item
+            class="mt-6 nav-title black-text"
+            prepend-icon="mdi-account-credit-card"
+            title="Transaction"
+            @click="drawer = mobile ? false : drawer; $router.push('/transaction')"
+          ></v-list-item>
+          
+          <!-- Logout Link -->
+          <v-list-item
+            class="mt-6 nav-title black-text"
+            prepend-icon="mdi-logout"
+            title="Logout"
+            @click="openLogoutModal"
+          ></v-list-item>
+        </v-list>
+      </v-navigation-drawer>
 
     <!-- Main Content -->
     <v-main class="main-content">
@@ -229,6 +290,17 @@ const openForm = () => {
 
 .app-bar {
   z-index: 1000;
+}
+
+.nav-title {
+  font-family: 'Merriweather', serif;
+  font-size: 1.4rem;
+  font-weight: 1000;
+  margin: 0;
+}
+
+.black-text {
+  color: black;
 }
 
 .sidebar {

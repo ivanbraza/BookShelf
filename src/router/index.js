@@ -41,7 +41,16 @@ const router = createRouter({
       component: Transactionsview,
       meta: { requiresAuth: true }
     },
-  ]
+  ],
+  scrollBehavior(to, from, savedPosition) {
+    if (to.hash) {
+      return {
+        el: to.hash, // Target the element with the hash ID
+        behavior: 'smooth', // Enables smooth scrolling
+      };
+    }
+    return savedPosition || { x: 0, y: 0 }; // Default position
+  },
 })
 
 router.beforeEach(async (to) => {
@@ -77,5 +86,6 @@ router.beforeEach(async (to) => {
     return { name: 'login' }; // Fallback redirect to login in case of error
   }
 });
+
 
 export default router
