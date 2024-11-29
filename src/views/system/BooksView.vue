@@ -1,3 +1,4 @@
+
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useDisplay } from 'vuetify';
@@ -390,4 +391,3 @@ body {
   font-family: 'Poppins', sans-serif;
 }
 </style>
-
