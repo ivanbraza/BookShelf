@@ -16,6 +16,7 @@ const drawer = ref(!mobile.value);
 
 // Reactive variables for books
 const categories = [
+  { name: 'All', subject: 'all' },
   { name: 'Agriculture', subject: 'agriculture' },
   { name: 'Engineering', subject: 'engineering' },
   { name: 'Environmental Science', subject: 'environmental_science' },
@@ -31,8 +32,10 @@ const error = ref(null);
 
 // Reactive state for dialogs
 const dialog = ref(false);
-const selectedDate = ref(null);
-const datePickerDialog = ref(false);
+const borrowDatePickerDialog = ref(false);
+const returnDatePickerDialog = ref(false);
+const selectedBorrowDate = ref(null);
+const selectedReturnDate = ref(null);
 
 // Logout modal reference
 const logoutModalRef = ref(null);
@@ -51,23 +54,37 @@ watch(mobile, (isMobile) => {
 const fetchBooks = async (subject) => {
   loading.value = true;
   error.value = null;
+
   try {
+    let query = '';
+    if (subject === 'all') {
+      query = 'book OR novel OR literature OR fiction OR biography OR art OR history OR mystery OR fantasy OR programming';
+    } else {
+      query = `subject:${subject}`;
+    }
+
     const { data } = await axios.get(
-      `https://openlibrary.org/subjects/${subject}.json`
+      `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=40`
     );
-    cards.value = data.works.map((book) => ({
-      title: book.title,
-      src: book.cover_id
-        ? `https://covers.openlibrary.org/b/id/${book.cover_id}-L.jpg`
-        : '/default-cover.jpg',
-      author: book.authors?.[0]?.name || 'Unknown Author',
-    }));
-  } catch {
+
+    if (data.items) {
+      cards.value = data.items.map((book) => ({
+        title: book.volumeInfo.title || 'No Title Available',
+        src: book.volumeInfo.imageLinks?.thumbnail || '/default-cover.jpg',
+        author: book.volumeInfo.authors?.[0] || 'Unknown Author',
+      }));
+    } else {
+      cards.value = [];
+      error.value = 'No books found for this category.';
+    }
+  } catch (err) {
     error.value = 'Failed to load books. Please try again.';
+    console.error(err);
   } finally {
     loading.value = false;
   }
 };
+
 
 // Watch for tab changes to fetch books for the new category
 watch(tabs, fetchBooks);
@@ -118,9 +135,99 @@ onMounted(async () => {
 });
 
 // Open form dialog
-const openForm = () => {
+const openForm = (book) => {
+  // Reset the selectedDate when opening the form
+  selectedDate.value = null;
+  selectedBookTitle.value = book.title; // Store the selected book's title
   dialog.value = true;
 };
+
+const selectedBookTitle = ref('');  // To store the selected book's title
+
+
+const selectedDate = ref(null); // Initialize as null or with a default value
+
+const formatDate = (date) => {
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  return new Date(date).toLocaleDateString(undefined, options);
+};
+
+const closeDialog = () => {
+  selectedBorrowDate.value = null; // Reset the borrow date
+  selectedReturnDate.value = null; // Reset the return date
+  dialog.value = false;            // Close the dialog
+};
+
+
+
+const submitForm = async () => {
+  if (!selectedBorrowDate.value || !selectedReturnDate.value) {
+      console.error('Please select a borrow and return date');
+      alert('Please select a borrow and return date');
+      return;
+    }
+
+  if (new Date(selectedReturnDate.value) <= new Date(selectedBorrowDate.value)) {
+    alert('Error: Return date must be later than borrow date.');
+    return;
+  }
+
+    // Fetch user info (from Supabase)
+    const user = await getUserInformation();
+    if (user) {
+      // Get the user's full name and user_id
+      const userFullName = `${user.firstname} ${user.lastname}`;
+      const userId = user.id; // Get the user's Supabase user ID
+
+
+      // Get the book details (from the selected card)
+      const selectedBook = cards.value.find((card) => card.title === selectedBookTitle.value); // selectedBookTitle is the title of the selected book
+
+      // Ensure the book is found
+      if (selectedBook) {
+        const bookDetails = {
+          title: selectedBook.title,
+          author: selectedBook.author,
+          cover: selectedBook.src,
+        };
+        const bookId = selectedBook.id; // Assuming each book has a unique ID
+
+        // Prepare transaction data
+        const transactionData = {
+      book_title: selectedBookTitle.value,
+      user_info: userFullName,
+      borrowed_date: selectedBorrowDate.value,
+      return_date: selectedReturnDate.value,
+    };
+
+        // Save the borrowing data to the 'transactions' table in Supabase
+        try {
+          const { data, error } = await supabase
+            .from('transactions')
+            .insert([transactionData]);
+
+          if (error) {
+            alert(`Error submitting form: ${error.message}`);
+            console.error('Error saving transaction:', error.message);
+          } else {
+            alert('Form submitted successfully!');
+            console.log('Transaction saved successfully:', data);
+            dialog.value = false; // Close the dialog after successful submission
+          }
+        } catch (error) {
+          alert('Error submitting form.');
+          console.error('Error during submission:', error.message);
+        }
+      } else {
+        alert('Error: Book not found.');
+        console.error('Book not found!');
+      }
+    } else {
+      alert('Error: User not found.');
+      console.error('User not found!');
+    }
+    closeDialog();
+  } 
 </script>
 
 
@@ -135,79 +242,127 @@ const openForm = () => {
       <v-img src="/images/logo2.png" class="mx-3 my-4" max-width="50px" alt="Logo"></v-img>
     </v-app-bar>
 
-    <!-- Sidebar Navigation Drawer --> 
+    <!-- Sidebar Navigation Drawer -->
     <v-navigation-drawer
-        v-model="drawer"
-        :temporary="mobile"
-        location="left"
-        :permanent="!mobile"
-        style="background-color: #E7F0DC"
-      >
-        <template v-slot:prepend>
-          <v-divider></v-divider>
-          <v-list-item
-            lines="two"
-            prepend-avatar="https://randomuser.me/api/portraits/women/81.jpg"
-            subtitle="Logged in"
-            :title="`${firstName || '...'} ${lastName || '...'}`"
-          ></v-list-item>
-        </template>
+      v-model="drawer"
+      :temporary="mobile"
+      location="left"
+      :permanent="!mobile"
+      style="background-color: #E7F0DC"
+    >
+      <template v-slot:prepend>
+        <v-divider></v-divider>
+        <v-list-item
+          lines="two"
+          prepend-avatar="https://randomuser.me/api/portraits/women/81.jpg"
+          subtitle="Logged in"
+          :title="`${firstName || '...'} ${lastName || '...'}`"
+        ></v-list-item>
+      </template>
 
-        <!-- Navigation Links -->
-        <v-list density="compact" nav>
-          <v-divider></v-divider>
-          <v-list-item
-            class="mt-8 nav-title black-text"
-            prepend-icon="mdi-home"
-            title="Home"
-            @click="drawer = mobile ? false : drawer; $router.push('/dashboard')"
-          ></v-list-item>
-          <v-list-item
-            class="mt-6 nav-title black-text"
-            prepend-icon="mdi-bookshelf"
-            title="Books"
-            @click="drawer = mobile ? false : drawer; $router.push('/books')"
-          ></v-list-item>
-          <v-list-item
-            class="mt-6 nav-title black-text"
-            prepend-icon="mdi-account-credit-card"
-            title="Transaction"
-            @click="drawer = mobile ? false : drawer; $router.push('/transaction')"
-          ></v-list-item>
-          
-          <!-- Logout Link -->
-          <v-list-item
-            class="mt-6 nav-title black-text"
-            prepend-icon="mdi-logout"
-            title="Logout"
-            @click="openLogoutModal"
-          ></v-list-item>
-        </v-list>
-      </v-navigation-drawer>
+      <!-- Navigation Links -->
+      <v-list density="compact" nav>
+        <v-divider></v-divider>
+        <v-list-item
+          class="mt-8 nav-title black-text"
+          prepend-icon="mdi-home"
+          title="Home"
+          @click="drawer = mobile ? false : drawer; $router.push('/dashboard')"
+        ></v-list-item>
+        <v-list-item
+          class="mt-6 nav-title black-text"
+          prepend-icon="mdi-bookshelf"
+          title="Books"
+          @click="drawer = mobile ? false : drawer; $router.push('/books')"
+        ></v-list-item>
+        <v-list-item
+          class="mt-6 nav-title black-text"
+          prepend-icon="mdi-account-credit-card"
+          title="Transaction"
+          @click="drawer = mobile ? false : drawer; $router.push('/transaction')"
+        ></v-list-item>
+        
+        <!-- Logout Link -->
+        <v-list-item
+          class="mt-6 nav-title black-text"
+          prepend-icon="mdi-logout"
+          title="Logout"
+          @click="openLogoutModal"
+        ></v-list-item>
+      </v-list>
+    </v-navigation-drawer>
 
     <!-- Main Content -->
-    <v-main class="main-content">
-      <!-- Categories -->
-      <v-row justify="center" class="category-buttons">
-        <v-btn
-          v-for="category in categories"
-          :key="category.subject"
-          :class="{ active: tabs === category.subject }"
-          @click="tabs = category.subject"
-          class="mx-2 mt-8"
+    <v-main class="main-content" style="background-color: aliceblue;">
+      <!-- Categories and Search Bar -->
+      <v-container fluid>
+        <!-- Desktop View -->
+        <v-row
+          justify="center"
+          align="center"
+          class="category-buttons"
+          v-if="!mobile"
         >
-          {{ category.name }}
-        </v-btn>
-      </v-row>
+          <!-- Desktop Categories Buttons -->
+          <v-btn
+            v-for="category in categories"
+            :key="category.subject"
+            :class="{ active: tabs === category.subject }"
+            @click="tabs = category.subject"
+            class="mx-2 mt-4"
+          >
+            {{ category.name }}
+          </v-btn>
+        </v-row>
 
-      <!-- Search Bar -->
-      <v-text-field
-        v-model="searchQuery"
-        label="Search Books"
-        prepend-inner-icon="mdi-magnify"
-        clearable
-        class="my-6 search-bar mt-10 py-10"
-      ></v-text-field>
+        <!-- Desktop Search Bar -->
+        <v-row
+          justify="center"
+          class="desktop-search-bar mt-4"
+          v-if="!mobile"
+        >
+          <v-text-field
+            v-model="searchQuery"
+            label="Search"
+            prepend-inner-icon="mdi-magnify"
+            dense
+            outlined
+            clearable
+            class="search-bar mt-12 py-12"
+          ></v-text-field>
+        </v-row>
+
+        <!-- Mobile View -->
+        <v-row
+          justify="space-between"
+          align="center"
+          class="mobile-toolbar py-2"
+          v-else
+        >
+          <!-- Dropdown for Categories -->
+          <v-col cols="4">
+            <select v-model="tabs">
+             <option v-for="category in categories" 
+             :key="category.subject" 
+             :value="category.subject">
+            {{ category.name }}
+           </option>
+           </select>
+          </v-col>
+
+          <!-- Search Bar -->
+          <v-col cols="8">
+            <v-text-field
+              v-model="searchQuery"
+              label="Search"
+              prepend-inner-icon="mdi-magnify"
+              dense
+              outlined
+              clearable
+            ></v-text-field>
+          </v-col>
+        </v-row>
+      </v-container>
 
       <!-- Cards -->
       <v-container>
@@ -231,13 +386,12 @@ const openForm = () => {
       <v-card-title class="book-card-title">{{ card.title }}</v-card-title>
       <v-card-subtitle class="book-card-subtitle">{{ card.author }}</v-card-subtitle>
       <v-card-actions>
-        <v-btn @click="openForm" color="primary" text>Borrow</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn @click="openForm(card)" color="primary" text>Borrow</v-btn>
       </v-card-actions>
-    </v-card>
-  </v-col>
-</v-row>
-
-
+     </v-card>
+    </v-col>
+   </v-row>
           <v-col v-if="error" cols="12" class="text-center">
             <p class="error-message">{{ error }}</p>
           </v-col>
@@ -247,40 +401,56 @@ const openForm = () => {
 
     <!-- Borrow Dialog -->
     <v-dialog v-model="dialog" max-width="500px">
-      <v-card>
-        <v-card-title>
-          <span class="headline">Borrow Book</span>
-        </v-card-title>
-        <v-card-text>
-          <v-form>
-            <v-text-field label="Name" required></v-text-field>
-            <v-text-field label="Email" type="email" required></v-text-field>
-            <v-text-field
-              v-model="selectedDate"
-              label="Select Date"
-              append-icon="mdi-calendar"
-              @click="datePickerDialog = true"
-            ></v-text-field>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn color="red darken-1" text @click="dialog = false">Cancel</v-btn>
-          <v-btn color="blue darken-1" text @click="dialog = false">Submit</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+  <v-card>
+    <v-card-title>
+      <span class="headline">Borrow Book</span>
+    </v-card-title>
+    <v-card-text>
+      <v-form>
+        <!-- Borrow Date -->
+        <v-text-field
+          v-model="selectedBorrowDate"
+          label="Borrow Date"
+          :value="selectedBorrowDate ? formatDate(selectedBorrowDate) : ''"
+          :rules="[value => !!value || 'Borrow date is required']"
+          append-inner-icon="mdi-calendar"
+          @click="borrowDatePickerDialog = true"
+        />
+        <v-dialog v-model="borrowDatePickerDialog" max-width="290px">
+          <v-date-picker
+            v-model="selectedBorrowDate"
+            @input="borrowDatePickerDialog = false"
+          ></v-date-picker>
+        </v-dialog>
 
-    <v-footer fixed class="font-weight-bold" elevation="4" app>
-      <v-row justify="center" class="white--text">
-        <v-col class="text-center py-2">
-          2024 - Book Shelf
-        </v-col>
-      </v-row>
-    </v-footer>
+        <!-- Return Date -->
+        <v-text-field
+          v-model="selectedReturnDate"
+          label="Return Date"
+          :value="selectedReturnDate ? formatDate(selectedReturnDate) : ''"
+          :rules="[value => !!value || 'Return date is required']"
+          append-inner-icon="mdi-calendar"
+          @click="returnDatePickerDialog = true"
+        />
+        <v-dialog v-model="returnDatePickerDialog" max-width="290px">
+          <v-date-picker
+            v-model="selectedReturnDate"
+            @input="returnDatePickerDialog = false"
+          ></v-date-picker>
+        </v-dialog>
+      </v-form>
+    </v-card-text>
+    <v-card-actions>
+      <v-btn color="red darken-1" text @click="closeDialog">Cancel</v-btn>
+      <v-btn color="blue darken-1" text @click="submitForm">Submit</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
 
-    <LogoutModal ref="logoutModalRef" />
-  </v-app>
-</template>
+       <!-- Logout Modal -->
+       <LogoutModal ref="logoutModalRef" />
+       </v-app>
+       </template>
 
 
 <style scoped>
@@ -304,11 +474,6 @@ const openForm = () => {
   color: black;
 }
 
-.sidebar {
-  background-color: #E7F0DC;
-  color: black;
-}
-
 /* Cards */
 .book-card-wrapper {
   display: flex;
@@ -326,6 +491,7 @@ const openForm = () => {
   flex-direction: column; /* Align the content in a column */
   justify-content: space-between; /* Space out the card elements */
   overflow: hidden; /* Prevent content overflow */
+  margin-top: 20%;
 }
 
 .book-card:hover {
@@ -368,6 +534,27 @@ const openForm = () => {
   margin: 0 auto;
 }
 
+/* Mobile Toolbar */
+.mobile-toolbar {
+  background-color: aliceblue;
+  padding: 5px 15px;
+  border-radius: 0px;
+  z-index: 10;
+  position: fixed;
+  width: 100%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Slight shadow for separation */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mobile-toolbar .v-select,
+.mobile-toolbar .v-text-field {
+  margin: 5px;
+  width: 100%;
+  color: inherit;
+}
+
 /* Footer */
 .footer {
   background-color: #232D3F;
@@ -380,14 +567,26 @@ const openForm = () => {
   font-weight: bold;
 }
 
-/* Typography */
-.nav-title {
-  font-family: 'Roboto', sans-serif;
-  font-size: 1.2rem;
-  font-weight: bold;
-}
-
 body {
   font-family: 'Poppins', sans-serif;
+}
+
+/* Category Buttons (Desktop) */
+.category-buttons {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 118%;
+  z-index: 10; /* Ensure it stays above other content */
+  background-color: aliceblue; /* Background color */
+  padding-top: 10px; /* Adjusted to reduce space */
+  display: flex; /* Makes sure buttons are laid out properly */
+  justify-content: center; /* Centers buttons */
+  flex-wrap: wrap; /* Wraps buttons if necessary */
+  padding: 70px 0; /* Optional: Adjusted padding */
+}
+
+.category-buttons .v-btn {
+  margin: 5px; /* Added margin for spacing between buttons */
 }
 </style>
