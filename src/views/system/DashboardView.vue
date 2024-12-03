@@ -21,14 +21,20 @@
         :permanent="!mobile"
         style="background-color: #E7F0DC"
       >
-        <template v-slot:prepend>
+      <template v-slot:prepend>
           <v-divider></v-divider>
           <v-list-item
             lines="two"
-            prepend-avatar="https://randomuser.me/api/portraits/women/81.jpg"
             subtitle="Logged in"
             :title="`${firstName || '...'} ${lastName || '...'}`"
-          ></v-list-item>
+          > <template v-slot:prepend>
+          <v-avatar color="primary" size="45">
+            <span class="white--text text-h6">
+              {{ getInitials(firstName, lastName) }}
+            </span>
+          </v-avatar>
+        </template>
+        </v-list-item>
         </template>
 
         <!-- Navigation Links -->
@@ -391,7 +397,7 @@ import { ref, watch, onMounted } from 'vue';
 import { useDisplay } from 'vuetify';
 import LogoutModal from '../auth/LogoutModal.vue';
 import { supabase } from '@/utils/supabase';
-
+import { getInitials } from '@/utils/helpers';
 // Mobile detection from Vuetify's display composable
 const { mobile } = useDisplay();
 const drawer = ref(!mobile.value);
