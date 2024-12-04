@@ -5,7 +5,6 @@ import { useDisplay } from 'vuetify';
 import axios from 'axios';
 import LogoutModal from '../auth/LogoutModal.vue';
 import { supabase } from '@/utils/supabase';
-import { getInitials } from '@/utils/helpers';
 // Reactive variables for user information
 const firstName = ref('');
 const lastName = ref('');
@@ -49,8 +48,6 @@ const openLogoutModal = () => {
 watch(mobile, (isMobile) => {
   drawer.value = !isMobile;
 });
-
-
 
 // Function to fetch books from OpenLibrary API
 const fetchBooks = async (subject) => {
@@ -252,21 +249,15 @@ const submitForm = async () => {
       :permanent="!mobile"
       style="background-color: #E7F0DC"
     >
-    <template v-slot:prepend>
-          <v-divider></v-divider>
-          <v-list-item
-            lines="two"
-            subtitle="Logged in"
-            :title="`${firstName || '...'} ${lastName || '...'}`"
-          > <template v-slot:prepend>
-          <v-avatar color="primary" size="45">
-            <span class="white--text text-h6">
-              {{ getInitials(firstName, lastName) }}
-            </span>
-          </v-avatar>
-        </template>
-        </v-list-item>
-        </template>
+      <template v-slot:prepend>
+        <v-divider></v-divider>
+        <v-list-item
+          lines="two"
+          prepend-avatar="https://randomuser.me/api/portraits/women/81.jpg"
+          subtitle="Logged in"
+          :title="`${firstName || '...'} ${lastName || '...'}`"
+        ></v-list-item>
+      </template>
 
       <!-- Navigation Links -->
       <v-list density="compact" nav>

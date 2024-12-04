@@ -6,7 +6,7 @@
         <v-icon>mdi-menu</v-icon>
       </v-btn>
       <v-spacer></v-spacer>
-      <v-img src="/images/bookshelf-logo.jpg" class="mx-3 my-4" max-width="50px"></v-img>
+      <v-img src="/images/logo.png" class="mx-3 my-4" max-width="50px"></v-img>
       <!-- Logout Button in App Bar -->
     </v-app-bar>
 
