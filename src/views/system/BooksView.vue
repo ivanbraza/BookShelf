@@ -5,7 +5,6 @@ import { useDisplay } from 'vuetify';
 import axios from 'axios';
 import LogoutModal from '../auth/LogoutModal.vue';
 import { supabase } from '@/utils/supabase';
-
 // Reactive variables for user information
 const firstName = ref('');
 const lastName = ref('');
