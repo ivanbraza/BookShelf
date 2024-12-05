@@ -3,6 +3,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useDisplay } from 'vuetify';
 import { supabase } from '@/utils/supabase';
 import { getInitials } from '@/utils/helpers';
+import LogoutModal from '../auth/LogoutModal.vue';
 
 // Mobile detection from Vuetify's display composable
 const { mobile } = useDisplay();

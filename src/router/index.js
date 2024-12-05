@@ -92,17 +92,17 @@ router.beforeEach(async (to) => {
       Librarian: ['librarian_dashboard', 'admin_transactions', 'borrow_request'], // Routes allowed for Librarians
     };
 
-   // Restrict access to admin routes
-if (isLoggedIn && roleBasedRoutes[roleBasedRoutes]) {
-  if (!['librarian_dashboard', 'admin_transactions', 'borrow_request'].includes(to.name)) {
-    return { name: 'librarian_dashboard' }; // Redirect admins to admin home if accessing non-admin routes
-  }
-} else {
-  if (['librarian_dashboard', 'admin_transactions', 'borrow_request'].includes(to.name)) {
-    return { name: 'dashboard' }; // Prevent non-admin users from accessing admin routes
-  }
-}
-
+    // Redirect users based on their role and requested route
+    if (isLoggedIn) {
+      if (userRole === 'Borrower' && !roleBasedRoutes.Borrower.includes(to.name)) {
+        // Prevent Borrowers from accessing Librarian-only routes
+        return { name: 'dashboard' };
+      } 
+      if (userRole === 'Librarian' && !roleBasedRoutes.Librarian.includes(to.name)) {
+        // Prevent Librarians from accessing Borrower-only routes
+        return { name: 'librarian_dashboard' }; // Redirect to librarian's dashboard
+      }
+    }
 
     // If not logged in, block access to protected routes
     if (!isLoggedIn && to.meta.requiresAuth) {

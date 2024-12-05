@@ -12,12 +12,12 @@ const isPasswordConfirmVisible = ref(false)
 const refVForm = ref()
 
 const formDataDefault = {
-firstnamed: '',
-lastname: '',
-email: '',
-password: '',
-roles: '',
-password_confirmation: '',
+  firstname: '',
+  lastname: '',
+  email: '',
+  password: '',
+  role: '', // Role field corrected
+  password_confirmation: ''
 }
 
 const formData = ref({
@@ -32,34 +32,44 @@ const onSubmit = async () => {
   // Reset Form Action utils
   formAction.value = { ...formActionDefault, formProcess: true }
 
-  const { data, error } = await supabase.auth.signUp({
-    email: formData.value.email,
-    password: formData.value.password,
-    options: {
-      data: {
-        firstname: formData.value.firstname,
-        lastname: formData.value.lastname,
-        is_admin: false // Just turn to true if super admin account
-        // role: 'Administrator' // If role based; just change the string based on role
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email: formData.value.email,
+      password: formData.value.password,
+      options: {
+        data: {
+          firstname: formData.value.firstname,
+          lastname: formData.value.lastname,
+          role: formData.value.role, // Store role in Supabase
+          is_admin: formData.value.role === 'Librarian' // Assign admin if Librarian
+        }
+      }
+    })
+
+    if (error) {
+      // Add Error Message and Status Code
+      formAction.value.formErrorMessage = error.message
+      formAction.value.formStatus = error.status
+    } else if (data) {
+      // Add Success Message
+      formAction.value.formSuccessMessage = 'Successfully Registered Account.'
+
+      // Redirect Based on Role
+      if (formData.value.role === 'Librarian') {
+        router.replace('/librarian_dashboard')
+      } else if (formData.value.role === 'Borrower') {
+        router.replace('/dashboard')
       }
     }
-  })
-
-  if (error) {
-    // Add Error Message and Status Code
-    formAction.value.formErrorMessage = error.message
-    formAction.value.formStatus = error.status
-  } else if (data) {
-    // Add Success Message
-    formAction.value.formSuccessMessage = 'Successfully Registered Account.'
-    // Redirect Acct to Dashboard
-    router.replace('/dashboard')
+  } catch (err) {
+    formAction.value.formErrorMessage = 'An unexpected error occurred.'
+    console.error(err)
+  } finally {
+    // Reset Form
+    refVForm.value?.reset()
+    // Turn off processing
+    formAction.value.formProcess = false
   }
-
-  // Reset Form
-  refVForm.value?.reset()
-  // Turn off processing
-  formAction.value.formProcess = false
 }
 
 // Trigger Validators
@@ -78,25 +88,27 @@ const onFormSubmit = () => {
   </AlertNotification>
 
   <v-form class="mt-5" ref="refVForm" @submit.prevent="onFormSubmit">
+    <!-- First Name and Last Name -->
     <v-row>
-      <v-text-field
+      <v-text-field 
         v-model="formData.firstname"
         prepend-icon="mdi-account"
-        label="Firstname"
+        label="First Name"
         variant="outlined"
-        class="v-col-6 "
+        class="v-col-6"
         :rules="[requiredValidator]"
       ></v-text-field>
 
       <v-text-field
         v-model="formData.lastname"
-        label="Lastname"
+        label="Last Name"
         variant="outlined"
         class="v-col-6"
         :rules="[requiredValidator]"
       ></v-text-field>
     </v-row>
 
+    <!-- Email -->
     <v-text-field
       v-model="formData.email"
       prepend-icon="mdi-email"
@@ -105,6 +117,7 @@ const onFormSubmit = () => {
       :rules="[requiredValidator, emailValidator]"
     ></v-text-field>
 
+    <!-- Password -->
     <v-text-field
       v-model="formData.password"
       prepend-icon="mdi-lock"
@@ -116,6 +129,7 @@ const onFormSubmit = () => {
       :rules="[requiredValidator, passwordValidator]"
     ></v-text-field>
 
+    <!-- Password Confirmation -->
     <v-text-field
       v-model="formData.password_confirmation"
       prepend-icon="mdi-lock-check"
@@ -125,12 +139,12 @@ const onFormSubmit = () => {
       :append-inner-icon="isPasswordConfirmVisible ? 'mdi-eye' : 'mdi-eye-off'"
       @click:append-inner="isPasswordConfirmVisible = !isPasswordConfirmVisible"
       class="my-2"
-      :rules="[requiredValidator, confirmedValidator(formData.password_confirmation,formData.password)]"
+      :rules="[requiredValidator, confirmedValidator(formData.password, formData.password_confirmation)]"
     ></v-text-field>
 
+    <!-- Role Dropdown -->
     <v-select
       v-model="formData.role"
-      class="pl-10"
       label="Select Role"
       :items="['Borrower', 'Librarian']"
       variant="outlined"
@@ -138,14 +152,16 @@ const onFormSubmit = () => {
       :rules="[requiredValidator]"
     ></v-select>
 
+    <!-- Register Button -->
     <v-btn
-      class=" mx-auto d-flex  "
+      class="mx-auto d-flex"
       color="indigo-darken-4"
       prepend-icon="mdi-account-plus"
       :disabled="formAction.formProcess"
       :loading="formAction.formProcess"
       type="submit"
-      >Register</v-btn
     >
+      Register
+    </v-btn>
   </v-form>
 </template>
