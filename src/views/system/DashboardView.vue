@@ -56,8 +56,9 @@
             class="mt-6 nav-title black-text"
             prepend-icon="mdi-account-credit-card"
             title="Transaction"
-            @click="drawer = mobile ? false : drawer; $router.push('/transaction')"
+            @click="drawer = mobile ? false : drawer; $router.push('/transactions')"
           ></v-list-item>
+    
           
           <!-- Logout Link -->
           <v-list-item
@@ -161,7 +162,7 @@
             class="hover-card"
             elevation="3"
             outlined
-            style="background-color: #E7F0DC;"
+            style="background-color: #ffffff;"
           >
             <v-card-text class="text-center d-flex flex-column align-center">
               <v-icon color="primary" size="48" class="mb-4">mdi-book-open-page-variant</v-icon>
@@ -176,7 +177,7 @@
             class="hover-card"
             elevation="3"
             outlined
-            style="background-color: #E7F0DC;"
+            style="background-color: #ffffff;"
           >
             <v-card-text class="text-center d-flex flex-column align-center">
               <v-icon color="primary" size="48" class="mb-4">mdi-calendar-check</v-icon>
@@ -191,7 +192,7 @@
             class="hover-card"
             elevation="3"
             outlined
-            style="background-color: #E7F0DC;"
+            style="background-color: #ffffff;"
           >
             <v-card-text class="text-center d-flex flex-column align-center">
               <v-icon color="primary" size="48" class="mb-4">mdi-library-shelves</v-icon>
@@ -228,7 +229,7 @@
 
   <!-- Column for Text -->
   <v-col cols="12" md="6" class="px-8">
-    <h1 class="text-start text-red font-weight-bold mb-4">
+    <h1 class="text-start text-primary font-weight-bold mb-4">
       <v-icon class="mr-2" size="32">mdi-alert-octagon</v-icon>
       Penalty for Late Returned Books
     </h1>
@@ -239,21 +240,14 @@
 
     <!-- Penalty Policy Cards -->
     <v-row class="g-4">
-      <v-col cols="12" sm="4">
+      <v-col cols="12" sm="6">
         <v-card elevation="3" class="pa-4 text-center rounded-lg" style="background-color: #FFFFFF;">
-          <h3 class="font-weight-bold text-primary">1–7 days late</h3>
+          <h3 class="font-weight-bold text-primary">1–14 days late</h3>
           <p class="mt-2"><br>₱10 per day</p>
         </v-card>
       </v-col>
 
-      <v-col cols="12" sm="4">
-        <v-card elevation="3" class="pa-4 text-center rounded-lg d-flex flex-column" style="background-color: #FFFFFF;">
-          <h3 class="font-weight-bold text-primary">8–14 days late</h3>
-          <p class="mt-2"><br>₱15 per day</p>
-        </v-card>
-      </v-col>
-
-      <v-col cols="12" sm="4">
+      <v-col cols="12" sm="6">
         <v-card elevation="3" class="pa-4 text-center rounded-lg d-flex flex-column" style="background-color: #FFFFFF;">
           <h3 class="font-weight-bold text-primary">15+ days late</h3>
           <p class="mt-2">
@@ -263,7 +257,7 @@
       </v-col>
     </v-row>
 
-    <p  class="text-center mt-6 text-red pa-4" 
+    <p  class="text-center mt-6 text-error pa-4" 
     style="background-color: #FFE5E5; border-radius: 8px; border: 1px solid #FFCCCC;">
       Please remember to return or renew your books before the due date!
     </p>
@@ -276,16 +270,75 @@
 <v-row class="mx-auto my-auto bg-4 py-16" id="libraryhours">
   <v-col class="pl-16 pr-16" cols="12">    
 
-    <h1 class="text-center text-secondary display-1 font-weight-bold mb-6">
+    <h1 class="text-center text-primary display-1 font-weight-bold mb-6">
         <v-icon class="mr-2" size="34">mdi-clock</v-icon>
        Library Hours</h1>
       <h3 class="text-center font-weight-medium mb-8">
       Our libary is here to provide you with resources, knowledge, and a space to learn.<br> The library is open during the following hours.
       </h3>
     
-      <v-container>
-        <v-img src="/public/images/OpenHours (1).png"></v-img>
-      </v-container>
+      <v-row>
+  <!-- Monday to Friday Card -->
+  <v-col cols="12" sm="4" class="py-auto px-auto">
+    <v-card
+      class="hover-card"
+      elevation="4"
+      outlined
+      style=" color: #ffffff; border-radius: 12px;"
+    >
+      <v-card-text class="text-center d-flex flex-column align-center py-6 px-4">
+        <v-icon color="primary" size="60" class="mb-2">mdi-calendar</v-icon>
+        <h4 class="font-weight-bold text-h5 text-secondary" style="font-size: 1.8rem;">MONDAY TO FRIDAY</h4>
+         <div class="d-flex flex-column align-center mt-2">
+          <br>
+          <p class="font-weight-bold text-black" style="font-size: 1.4rem; margin: 0;">08:00 AM TO 07:00 PM</p>
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-col>
+
+  <!-- Saturday Card -->
+  <v-col cols="12" sm="4" class="py-auto px-auto">
+    <v-card
+      class="hover-card"
+      elevation="4"
+      outlined
+      style=" color: #ffffff; border-radius: 12px;"
+    >
+      <v-card-text class="text-center d-flex flex-column align-center py-6 px-4">
+        <v-icon color="primary" size="60" class="mb-2">mdi-calendar</v-icon>
+        <h4 class="font-weight-bold text-h5 text-secondary" style="font-size: 1.8rem;">SATURDAY</h4>
+        <div class="d-flex flex-column align-center mt-2">
+          <br>
+          <p class="font-weight-bold text-black" style="font-size: 1.4rem; margin: 0;">10:00 AM TO 05:00 PM</p>
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-col>
+
+
+<!-- Sunday Card -->
+<v-col cols="12" sm="4" class="py-auto px-auto">
+    <v-card
+      class="hover-card"
+      elevation="4"
+      outlined
+      style=" color: #ffffff; border-radius: 12px;"
+    >
+      <v-card-text class="text-center d-flex flex-column align-center py-6 px-4">
+        <v-icon color="primary" size="60" class="mb-2">mdi-calendar</v-icon>
+        <h4 class="font-weight-bold text-h5 text-secondary" style="font-size: 1.8rem;">SUNDAY</h4>
+        <div class="d-flex flex-column align-center mt-2">
+          <br>
+          <p class="font-weight-bold text-black" style="font-size: 1.4rem; margin: 0;">CLOSED</p>
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-col>
+</v-row>
+
+
+
 
 
   </v-col>
@@ -342,32 +395,16 @@
       <!-- Card 4 -->
       <v-col cols="12" sm="4">
         <v-card class="text-center pa-4 hover-card">
-          <v-img src="/public/images/LaptopArea.jpg" max-height="145"></v-img>
+          <v-img src="/public/images/AudioVisuaRoom.jpeg" max-height="145" width="auto"></v-img>
           <h3 class="font-weight-bold mt-2">Audio Visual Room</h3>
           <p>For viewing and borrowing of digital interactive CDs and DVDs.</p>
         </v-card>
       </v-col>
 
-      <!-- Card 5 -->
-      <v-col cols="12" sm="4">
-        <v-card class="text-center pa-4 hover-card">
-          <v-img src="/public/images/LibraryOrientation.png"></v-img>
-          <h3 class="font-weight-bold mt-2">Library Orientation</h3>
-          <p>Provides a good understanding of the library's objectives, facilities, resources and services.</p>
-        </v-card>
-      </v-col>
+     
 
-      <!-- Card 6 -->
-      <v-col cols="12" sm="4">
-        <v-card class="text-center pa-4 hover-card">
-          <v-img src="/public/images/BibliographicAssistance.jpg" max-height="145"></v-img>
-          <h3 class="font-weight-bold mt-2">One-stop trading solution</h3>
-          <p>Order seamlessly from product/supplier search to order management, payment, and fulfillment.</p>
-        </v-card>
-      </v-col>
     </v-row>
   </v-container>
-
 
 
   </v-col>
@@ -494,7 +531,7 @@ onMounted(async () => {
 }
 
 .bg-4 {
-  background-color: #ffffff;
+  background-color: #bcc8e1;
 }
 
 
