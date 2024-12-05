@@ -62,13 +62,12 @@ const loading = ref(true);
 const error = ref(null);
 const headers = ref([
   { title: 'Book Title', value: 'book_title' },
-  { title: 'User Info', value: 'user_info' },
-  { title: 'Email', value: 'email' },
   { title: 'Borrow Date', value: 'borrowed_date' },
   { title: 'Return Date', value: 'return_date' },
   { title: 'Status', value: 'status' },
-  
+  { title: 'Actions', value: 'actions' }, // New actions column
 ]);
+
 // Fetch transactions
 const fetchTransactions = async () => {
   loading.value = true;
@@ -99,7 +98,30 @@ const fetchTransactions = async () => {
   }
 };
 
+// Function to mark a transaction as returned
+const markAsReturned = async (transaction) => {
+  try {
+    // Update the status in the database
+    const { error } = await supabase
+      .from('transactions')
+      .update({ status: 'returned' })
+      .eq('id', transaction.id);
 
+    if (error) {
+      alert('Error marking transaction as returned:', error.message);
+      error.value = 'Failed to update transaction. Please try again.';
+      return;
+    }
+
+    // Remove the transaction from the table locally
+    transactions.value = transactions.value.filter((t) => t.id !== transaction.id);
+
+    alert(`Book marked as returned and removed from the table.`);
+  } catch (err) {
+    console.error('Unexpected error while marking as returned:', err.message);
+    error.value = 'An unexpected error occurred. Please try again later.';
+  }
+};
 
 
 
@@ -188,30 +210,59 @@ onMounted(fetchTransactions);
 
           <!-- Transactions Table -->
           <v-data-table
-            :items="transactions"
-            :headers="headers"
-            dense
-            :loading="loading"
-            v-if="!loading"
-            class="responsive-table"
-          >
-            <template v-slot:body-cell.date="{ item }">
-              <!-- Rotate the date text vertically -->
-              <span class="vertical-text">
-                {{ item.date }}
-              </span>
-            </template>
+    :items="transactions"
+    :headers="headers"
+    dense
+    :loading="loading"
+    class="responsive-table"
+    hide-default-header
+  >
+    <template v-slot:body="{ items }">
+      <template v-for="item in items" :key="item.id">
+        <!-- Card View on Mobile -->
+        <div class="table-card" v-if="mobile">
+          <div class="table-card-field">
+            <span class="field-label">Book Title:</span>
+            <span class="field-value">{{ item.book_title }}</span>
+          </div>
+          <div class="table-card-field">
+            <span class="field-label">Borrow Date:</span>
+            <span class="field-value">{{ item.borrowed_date }}</span>
+          </div>
+          <div class="table-card-field">
+            <span class="field-label">Return Date:</span>
+            <span class="field-value">{{ item.return_date }}</span>
+          </div>
+          <div class="table-card-field">
+            <span class="field-label">Status:</span>
+            <v-chip :color="item.status === 'confirmed' ? 'green' : 'orange'" text-color="white" small>
+              {{ item.status }}
+            </v-chip>
+          </div>
+          <div class="table-card-field">
+            <v-btn @click="markAsReturned(item); alert('Book returned')" color="green" small>Returned</v-btn>
+          </div>
+        </div>
 
-            <template v-slot:body-cell.status="{ item }">
-              <v-chip :color="item.status === 'confirmed' ? 'green' : 'orange'" text-color="white" small>
-                {{ item.status }}
-              </v-chip>
-            </template>
-
-          </v-data-table>
-
+        <!-- Default Table Row View for Larger Screens -->
+        <tr v-else>
+          <td>{{ item.book_title }}</td>
+          <td>{{ item.borrowed_date }}</td>
+          <td>{{ item.return_date }}</td>
+          <td>
+            <v-chip :color="item.status === 'confirmed' ? 'green' : 'orange'" text-color="white" small>
+              {{ item.status }}
+            </v-chip>
+          </td>
+          <td>
+            <v-btn @click="markAsReturned(item)" color="green" small>Returned</v-btn>
+          </td>
+        </tr>
+      </template>
+    </template>
+  </v-data-table>
           <!-- Message if no transactions -->
-          <v-alert v-else-if="!loading && transactions.length === 0" type="info" color="blue">
+          <v-alert v-if="!loading && transactions.length === 0" type="info" color="blue">
             No pending transactions found.
           </v-alert>
         </v-container>
@@ -361,5 +412,42 @@ onMounted(fetchTransactions);
   transform-origin: bottom left;
   white-space: nowrap;
   padding-left: 10px;
+}
+
+.table-card {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.table-card-field {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.field-label {
+  font-weight: bold;
+  color: #555;
+}
+
+.field-value {
+  text-align: right;
+  color: #333;
+}
+
+/* Hide Default Table on Mobile */
+@media screen and (max-width: 600px) {
+  .v-data-table table {
+    display: none;
+  }
+
+  .table-card {
+    display: block;
+  }
 }
 </style>

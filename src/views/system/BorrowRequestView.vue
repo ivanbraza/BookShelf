@@ -121,7 +121,7 @@ const handleAccept = async (item) => {
     if (fetchError) {
       console.error('Error fetching updated transaction:', fetchError.message);
     } else {
-      console.log('Transaction updated:', data);
+      alert('Request Accepted:', data);
       // Optionally, update the local transactions array or state with the new data
       fetchTransactions(); // Refresh the transactions list
     }
@@ -142,7 +142,7 @@ const handleDeny = async (item) => {
     if (updateError) {
       console.error('Error denying transaction:', updateError.message);
     } else {
-      console.log('Transaction denied:', data);
+      alert('Transaction denied:', data);
       fetchTransactions(); // Refresh the transactions after the update
     }
   } catch (err) {
@@ -225,7 +225,7 @@ onMounted(fetchTransactions);
       <v-container class="content-area px-auto py-auto mt-16">
         <v-container elevation="4">
           <v-card-title class="font-weight-bold text-center text-secondary" style="font-size: 32px;">
-            Transactions
+            Borrow Request
           </v-card-title>
 
           <!-- Error Alert -->
@@ -235,25 +235,68 @@ onMounted(fetchTransactions);
 
           <!-- Transactions Table -->
           <v-data-table
-  :items="transactions"
-  :headers="headers"
-  dense
-  :loading="loading"
-  v-if="!loading">
-  <template v-slot:body-cell.status="{ item }">
-    <v-chip :color="item.status === 'confirmed' ? 'green' : 'orange'" text-color="white" small>
-      {{ item.status }}
-    </v-chip>
-  </template>
+    :items="transactions"
+    :headers="headers"
+    dense
+    :loading="loading"
+    class="responsive-table"
+    hide-default-header
+  >
+    <template v-slot:body="{ items }">
+      <template v-for="item in items" :key="item.id">
+        <!-- Card View on Mobile -->
+        <div class="table-card" v-if="mobile">
+          <div class="table-card-field">
+            <span class="field-label">Borrower:</span>
+            <span class="field-value">{{ item.user_info }}</span>
+          </div>
+          <div class="table-card-field">
+            <span class="field-label">Book Title:</span>
+            <span class="field-value">{{ item.book_title }}</span>
+          </div>
+          <div class="table-card-field">
+            <span class="field-label">Borrow Date:</span>
+            <span class="field-value">{{ item.borrowed_date }}</span>
+          </div>
+          <div class="table-card-field">
+            <span class="field-label">Return Date:</span>
+            <span class="field-value">{{ item.return_date }}</span>
+          </div>
+          <div class="table-card-field">
+            <span class="field-label">Status:</span>
+            <v-chip :color="item.status === 'confirmed' ? 'green' : 'orange'" text-color="white" small>
+              {{ item.status }}
+            </v-chip>
+          </div>
+          <div class="table-card-field">
+           
+                <v-btn @click="handleAccept(item)" color="green" small>Accept</v-btn>
+                <v-btn @click="handleDeny(item)" color="red" small>Deny</v-btn>
+            
+          </div>
+        </div>
 
-  <template v-slot:item.actions="{ item }">
-    <v-btn @click="handleAccept(item)" color="green" small>Accept</v-btn>
-    <v-btn @click="handleDeny(item)" color="red" small>Deny</v-btn>
-  </template>
-</v-data-table>
+        <!-- Default Table Row View for Larger Screens -->
+        <tr v-else>
+          <td>{{ item.book_title }}</td>
+          <td>{{ item.borrowed_date }}</td>
+          <td>{{ item.return_date }}</td>
+          <td>
+            <v-chip :color="item.status === 'confirmed' ? 'green' : 'orange'" text-color="white" small>
+              {{ item.status }}
+            </v-chip>
+          </td>
+          <td>
+            <v-btn @click="handleAccept(item)" color="green" small class="py-3 px-5 mx-4">Accept</v-btn>
+            <v-btn @click="handleDeny(item)" color="red" class="py-3 px-5">Deny</v-btn>
+          </td>
+        </tr>
+      </template>
+    </template>
+  </v-data-table>
 
           <!-- Message if no transactions -->
-          <v-alert v-else-if="!loading && transactions.length === 0" type="info" color="blue">
+          <v-alert v-if="!loading && transactions.length === 0" type="info" color="blue">
             No pending transactions found.
           </v-alert>
         </v-container>
@@ -298,7 +341,7 @@ onMounted(fetchTransactions);
 }
 
 .content-area {
-  margin-left: 19%;
+  margin-left: 22%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -371,4 +414,62 @@ onMounted(fetchTransactions);
     white-space: nowrap;
   }
 }
+/* Adjust for better mobile alignment */
+/* Make sure cards take full width and align properly on mobile */
+@media screen and (max-width: 600px) {
+  .content-area {
+    margin-left: 0; /* Remove left margin on mobile */
+    padding: 0 10px; /* Add some padding to the sides of the container */
+    display: flex;
+    justify-content: center; /* Center content */
+    align-items: flex-start; /* Align items to the start */
+  }
+
+  .table-card {
+    width: 100%; /* Ensure the card takes up full width */
+    display: block;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-sizing: border-box; /* Include padding and border in the width */
+  }
+
+  .table-card-field {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    align-items: center;
+  }
+
+  .field-label {
+    font-weight: bold;
+    color: #555;
+    flex: 1 0 40%; /* Make the label occupy less space */
+  }
+
+  .field-value {
+    text-align: right;
+    color: #333;
+    flex: 1 0 60%; /* Make the value occupy more space */
+  }
+
+  /* Hide Default Table on Mobile */
+  .v-data-table table {
+    display: none;
+  }
+
+  /* Allow horizontal scrolling if necessary */
+  .v-data-table__wrapper {
+    overflow-x: auto; /* Allow horizontal scrolling if table content overflows */
+  }
+
+  /* Adjust table layout on mobile */
+  .v-data-table td,
+  .v-data-table th {
+    white-space: nowrap; /* Ensure content fits inside */
+  }
+}
+
 </style>
