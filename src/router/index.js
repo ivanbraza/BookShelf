@@ -6,6 +6,10 @@ import BooksView from '@/views/system/BooksView.vue'
 import Transactionsview from '@/views/system/Transactionsview.vue'
 import RegisterVue from '@/views/auth/RegisterVue.vue'
 import { getUserInformation, isAuthenticated } from '@/utils/supabase'
+import BorrowRequestView from '@/views/system/BorrowRequestView.vue'
+import AdminDashboardView from '@/views/system/LibrarianDashboardView.vue'
+import LibrarianDashboardView from '@/views/system/LibrarianDashboardView.vue'
+import AdminTransactionView from '@/views/system/AdminTransactionView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -41,6 +45,24 @@ const router = createRouter({
       component: Transactionsview,
       meta: { requiresAuth: true }
     },
+    {
+      path: '/borrow_request',
+      name: 'borrow_request',
+      component: BorrowRequestView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/librarian_dashboard',
+      name: 'librarian_dashboard',
+      component: LibrarianDashboardView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/admin_transactions',
+      name: 'admin_transactions',
+      component: AdminTransactionView,
+      meta: { requiresAuth: true }
+    },
   ],
   scrollBehavior(to, from, savedPosition) {
     if (to.hash) {
@@ -57,23 +79,30 @@ router.beforeEach(async (to) => {
   try {
     const isLoggedIn = await isAuthenticated();
     const userMetadata = isLoggedIn ? await getUserInformation() : null;
-    const isAdmin = userMetadata?.is_admin === true;
+    const userRole = userMetadata?.role;
 
     // Prevent logged-in users from accessing login or register pages
     if (isLoggedIn && (to.name === 'login' || to.name === 'register')) {
       return { name: 'dashboard' }; // Redirect logged-in users to the dashboard
     }
 
-    // Restrict access to admin routes
-    if (isAdmin) {
-      if (!['adminhome', 'adminprofile', 'users'].includes(to.name)) {
-        return { name: 'adminhome' }; // Redirect admins to admin home if accessing non-admin routes
-      }
-    } else {
-      if (['adminhome', 'adminprofile', 'users'].includes(to.name)) {
-        return { name: 'dashboard' }; // Prevent non-admin users from accessing admin routes
-      }
-    }
+    // Define accessible routes for each role
+    const roleBasedRoutes = {
+      Borrower: ['dashboard', 'books', 'transactions'], // Routes allowed for Borrowers
+      Librarian: ['librarian_dashboard', 'admin_transactions', 'borrow_request'], // Routes allowed for Librarians
+    };
+
+   // Restrict access to admin routes
+if (isLoggedIn && roleBasedRoutes[roleBasedRoutes]) {
+  if (!['librarian_dashboard', 'admin_transactions', 'borrow_request'].includes(to.name)) {
+    return { name: 'librarian_dashboard' }; // Redirect admins to admin home if accessing non-admin routes
+  }
+} else {
+  if (['librarian_dashboard', 'admin_transactions', 'borrow_request'].includes(to.name)) {
+    return { name: 'dashboard' }; // Prevent non-admin users from accessing admin routes
+  }
+}
+
 
     // If not logged in, block access to protected routes
     if (!isLoggedIn && to.meta.requiresAuth) {

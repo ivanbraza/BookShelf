@@ -5,6 +5,7 @@ import { useDisplay } from 'vuetify';
 import axios from 'axios';
 import LogoutModal from '../auth/LogoutModal.vue';
 import { supabase } from '@/utils/supabase';
+import { getInitials } from '@/utils/helpers';
 // Reactive variables for user information
 const firstName = ref('');
 const lastName = ref('');
@@ -243,53 +244,60 @@ const submitForm = async () => {
 
     <!-- Sidebar Navigation Drawer -->
     <v-navigation-drawer
-      v-model="drawer"
-      :temporary="mobile"
-      location="left"
-      :permanent="!mobile"
-      style="background-color: #E7F0DC"
-    >
+        v-model="drawer"
+        :temporary="mobile"
+        location="left"
+        :permanent="!mobile"
+        style="background-color: #E7F0DC"
+      >
       <template v-slot:prepend>
-        <v-divider></v-divider>
-        <v-list-item
-          lines="two"
-          prepend-avatar="https://randomuser.me/api/portraits/women/81.jpg"
-          subtitle="Logged in"
-          :title="`${firstName || '...'} ${lastName || '...'}`"
-        ></v-list-item>
-      </template>
+          <v-divider></v-divider>
+          <v-list-item
+            lines="two"
+            subtitle="Logged in"
+            :title="`${firstName || '...'} ${lastName || '...'}`"
+          > <template v-slot:prepend>
+          <v-avatar color="primary" size="45">
+            <span class="white--text text-h6">
+              {{ getInitials(firstName, lastName) }}
+            </span>
+          </v-avatar>
+        </template>
+        </v-list-item>
+        </template>
 
-      <!-- Navigation Links -->
-      <v-list density="compact" nav>
-        <v-divider></v-divider>
-        <v-list-item
-          class="mt-8 nav-title black-text"
-          prepend-icon="mdi-home"
-          title="Home"
-          @click="drawer = mobile ? false : drawer; $router.push('/dashboard')"
-        ></v-list-item>
-        <v-list-item
-          class="mt-6 nav-title black-text"
-          prepend-icon="mdi-bookshelf"
-          title="Books"
-          @click="drawer = mobile ? false : drawer; $router.push('/books')"
-        ></v-list-item>
-        <v-list-item
-          class="mt-6 nav-title black-text"
-          prepend-icon="mdi-account-credit-card"
-          title="Transaction"
-          @click="drawer = mobile ? false : drawer; $router.push('/transaction')"
-        ></v-list-item>
-        
-        <!-- Logout Link -->
-        <v-list-item
-          class="mt-6 nav-title black-text"
-          prepend-icon="mdi-logout"
-          title="Logout"
-          @click="openLogoutModal"
-        ></v-list-item>
-      </v-list>
-    </v-navigation-drawer>
+        <!-- Navigation Links -->
+        <v-list density="compact" nav>
+          <v-divider></v-divider>
+          <v-list-item
+            class="mt-8 nav-title black-text"
+            prepend-icon="mdi-home"
+            title="Home"
+            @click="drawer = mobile ? false : drawer; $router.push('/dashboard')"
+          ></v-list-item>
+          <v-list-item
+            class="mt-6 nav-title black-text"
+            prepend-icon="mdi-bookshelf"
+            title="Books"
+            @click="drawer = mobile ? false : drawer; $router.push('/books')"
+          ></v-list-item>
+          <v-list-item
+            class="mt-6 nav-title black-text"
+            prepend-icon="mdi-account-credit-card"
+            title="Transaction"
+            @click="drawer = mobile ? false : drawer; $router.push('/transactions')"
+          ></v-list-item>
+    
+          
+          <!-- Logout Link -->
+          <v-list-item
+            class="mt-6 nav-title black-text"
+            prepend-icon="mdi-logout"
+            title="Logout"
+            @click="openLogoutModal"
+          ></v-list-item>
+        </v-list>
+      </v-navigation-drawer>
 
     <!-- Main Content -->
     <v-main class="main-content" style="background-color: aliceblue;">

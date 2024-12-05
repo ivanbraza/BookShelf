@@ -3,7 +3,6 @@ import { ref, onMounted, watch } from 'vue';
 import { useDisplay } from 'vuetify';
 import { supabase } from '@/utils/supabase';
 import { getInitials } from '@/utils/helpers';
-import LogoutModal from '../auth/LogoutModal.vue';
 
 // Mobile detection from Vuetify's display composable
 const { mobile } = useDisplay();
@@ -55,46 +54,30 @@ onMounted(async () => {
   }
 });
 
+
 // State for transactions
 const transactions = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const headers = ref([
   { title: 'Book Title', value: 'book_title' },
+  { title: 'User Info', value: 'user_info' },
+  { title: 'Email', value: 'email' },
   { title: 'Borrow Date', value: 'borrowed_date' },
   { title: 'Return Date', value: 'return_date' },
-  { title: 'Status', value: 'status' }, // New status column
+  { title: 'Status', value: 'status' },
+  { title: 'Actions', value: 'actions' }, // New column for Accept/Deny actions
 ]);
-
 // Fetch transactions
 const fetchTransactions = async () => {
   loading.value = true;
   error.value = null;
 
   try {
-    console.log('Fetching user data from Supabase...');
-    const { data: user, error: userError } = await supabase.auth.getUser();
-
-    if (userError) {
-      console.error('Error fetching user data:', userError.message);
-      error.value = 'Failed to fetch user information. Please try again.';
-      return;
-    }
-
-    if (!user || !user.user) {
-      console.warn('No user is currently logged in.');
-      error.value = 'No user is logged in. Please log in to view transactions.';
-      return;
-    }
-
-    const email = user.user.email;
-    console.log('User email fetched:', email);
-
-    console.log('Fetching transactions for the user...');
     const { data, error: fetchError } = await supabase
       .from('transactions')
-      .select('book_title, user_info, borrowed_date, return_date, status') // Include the status field
-      .eq('email', email);
+      .select('id, book_title, user_info, email, borrowed_date, return_date, status')  // Ensure 'id' is included
+      .eq('status', 'Pending');  // Ensure you're fetching pending transactions
 
     if (fetchError) {
       console.error('Supabase query error:', fetchError.message);
@@ -103,19 +86,69 @@ const fetchTransactions = async () => {
     }
 
     if (data && data.length > 0) {
-      console.log('Transactions fetched successfully:', data);
-      transactions.value = data;
+      transactions.value = data;  // Set the reactive transactions array
     } else {
-      console.warn('No transactions found for the user.');
-      transactions.value = [];
+      transactions.value = [];  // If no data, ensure it is an empty array
     }
   } catch (err) {
-    console.error('Unexpected error during transaction fetch:', err.message);
+    console.error('Unexpected error during transaction fetch:', err);
     error.value = 'An unexpected error occurred. Please refresh the page.';
   } finally {
     loading.value = false;
   }
 };
+const handleAccept = async (item) => {
+  try {
+    // First, perform the update operation
+    const { error: updateError } = await supabase
+      .from('transactions')
+      .update({ status: 'confirmed' })
+      .eq('id', item.id);  // Make sure the ID is correct
+
+    if (updateError) {
+      console.error('Error accepting transaction:', updateError.message);
+      return;
+    }
+
+    // Fetch the updated transaction manually
+    const { data, error: fetchError } = await supabase
+      .from('transactions')
+      .select('book_title, user_info, email, borrowed_date, return_date, status')
+      .eq('id', item.id)
+      .single(); // Fetch a single row by ID
+
+    if (fetchError) {
+      console.error('Error fetching updated transaction:', fetchError.message);
+    } else {
+      console.log('Transaction updated:', data);
+      // Optionally, update the local transactions array or state with the new data
+      fetchTransactions(); // Refresh the transactions list
+    }
+  } catch (err) {
+    console.error('Unexpected error accepting transaction:', err);
+  }
+};
+
+
+
+const handleDeny = async (item) => {
+  try {
+    const { data, error: updateError } = await supabase
+      .from('transactions')
+      .update({ status: 'denied' })
+      .eq('id', item.id);
+
+    if (updateError) {
+      console.error('Error denying transaction:', updateError.message);
+    } else {
+      console.log('Transaction denied:', data);
+      fetchTransactions(); // Refresh the transactions after the update
+    }
+  } catch (err) {
+    console.error('Unexpected error denying transaction:', err);
+  }
+};
+
 // Fetch transactions on component mount
 onMounted(fetchTransactions);
 </script>
@@ -163,21 +196,21 @@ onMounted(fetchTransactions);
             class="mt-8 nav-title black-text"
             prepend-icon="mdi-home"
             title="Home"
-            @click="drawer = mobile ? false : drawer; $router.push('/dashboard')"
+            @click="drawer = mobile ? false : drawer; $router.push('/librarian_dashboard')"
           ></v-list-item>
           <v-list-item
             class="mt-6 nav-title black-text"
-            prepend-icon="mdi-bookshelf"
-            title="Books"
-            @click="drawer = mobile ? false : drawer; $router.push('/books')"
+            prepend-icon="mdi-book-plus"
+            title="Borrow Requests"
+            @click="drawer = mobile ? false : drawer; $router.push('/borrow_request')"
           ></v-list-item>
           <v-list-item
             class="mt-6 nav-title black-text"
             prepend-icon="mdi-account-credit-card"
-            title="Transaction"
-            @click="drawer = mobile ? false : drawer; $router.push('/transactions')"
+            title="Transactions"
+            @click="drawer = mobile ? false : drawer; $router.push('/admin_transactions')"
           ></v-list-item>
-        
+          
           <!-- Logout Link -->
           <v-list-item
             class="mt-6 nav-title black-text"
@@ -189,7 +222,7 @@ onMounted(fetchTransactions);
       </v-navigation-drawer>
 
       <v-container class="content-area px-auto py-auto mt-16">
-        <v-container class="border-md" elevation="4">
+        <v-container elevation="4">
           <v-card-title class="font-weight-bold text-center text-secondary" style="font-size: 32px;">
             Transactions
           </v-card-title>
@@ -201,20 +234,25 @@ onMounted(fetchTransactions);
 
           <!-- Transactions Table -->
           <v-data-table
-            :items="transactions"
-            :headers="headers"
-            dense
-            :loading="loading"
-            >
-            <template v-slot:body-cell.status="{ item }">
-              <v-chip :color="item.status === 'confirmed' ? 'green' : 'orange'" text-color="white" small>
-                {{ item.status }}
-              </v-chip>
-            </template>
-          </v-data-table>
+  :items="transactions"
+  :headers="headers"
+  dense
+  :loading="loading"
+  v-if="!loading">
+  <template v-slot:body-cell.status="{ item }">
+    <v-chip :color="item.status === 'confirmed' ? 'green' : 'orange'" text-color="white" small>
+      {{ item.status }}
+    </v-chip>
+  </template>
+
+  <template v-slot:item.actions="{ item }">
+    <v-btn @click="handleAccept(item)" color="green" small>Accept</v-btn>
+    <v-btn @click="handleDeny(item)" color="red" small>Deny</v-btn>
+  </template>
+</v-data-table>
 
           <!-- Message if no transactions -->
-          <v-alert v-if="!loading && transactions.length === 0" type="info" color="blue">
+          <v-alert v-else-if="!loading && transactions.length === 0" type="info" color="blue">
             No pending transactions found.
           </v-alert>
         </v-container>
@@ -272,32 +310,22 @@ onMounted(fetchTransactions);
   font-size: 16px;
 }
 
-/* Added styles for table outlines and hover effects */
-.v-data-table {
-  border: 1px solid #ccc; /* Outer border for the table */
-  border-radius: 8px;
-}
-
 .v-data-table td,
 .v-data-table th {
   padding: 15px 16px;
-  border: 1px solid #ddd; /* Inner borders for cells */
-  text-align: center;
+  border-bottom: 1px solid #ddd;
 }
 
-.v-data-table th {
-  background-color: #f4f4f4; /* Light background for headers */
-  font-weight: bold;
-  color: #232624; /* Header text color */
+.v-data-table .row-hover:hover {
+  background-color: wheat;
 }
 
-.v-data-table tbody tr:hover {
-  background-color: wheat; /* Highlight row on hover */
+.v-data-table td {
+  text-align: left;
 }
 
 .v-data-table .v-data-table__wrapper {
-  border-radius: 8px;
-  overflow: hidden; /* Ensures table fits nicely in the card */
+  border-radius: 10px;
 }
 
 .v-card {
@@ -322,24 +350,24 @@ onMounted(fetchTransactions);
 
 /* Make tables responsive on mobile */
 @media screen and (max-width: 600px) {
-  .v-data-table .v-data-table__wrapper {
+  table {
+    display: block;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
   }
 
-  .v-data-table th, .v-data-table td {
-    font-size: 14px;
-    padding: 12px;
+  thead {
+    display: table-header-group;
   }
 
-  .content-area {
-    margin-left: 0;
-    margin-right: 0;
-    padding: 10px;
+  tbody {
+    display: table-row-group;
   }
 
-  .v-list-item {
-    font-size: 1rem;
+  th, td {
+    padding: 0.5em;
+    text-align: left;
+    white-space: nowrap;
   }
 }
 </style>
