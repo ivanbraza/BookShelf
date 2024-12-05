@@ -93,7 +93,7 @@ router.beforeEach(async (to) => {
     };
 
    // Restrict access to admin routes
-if (isLoggedIn && roleBasedRoutes["Librarian"]) {
+if (isLoggedIn && roleBasedRoutes[roleBasedRoutes]) {
   if (!['librarian_dashboard', 'admin_transactions', 'borrow_request'].includes(to.name)) {
     return { name: 'librarian_dashboard' }; // Redirect admins to admin home if accessing non-admin routes
   }
