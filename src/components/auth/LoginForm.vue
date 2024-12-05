@@ -24,30 +24,40 @@ const refVForm = ref()
 
 const onSubmit = async () => {
   // Reset Form Action utils; Turn on processing at the same time
-  formAction.value = { ...formActionDefault, formProcess: true }
+  formAction.value = { ...formActionDefault, formProcess: true };
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email: formData.value.email,
     password: formData.value.password,
-    role: formData.value.role
-  })
+  });
 
   if (error) {
     // Add Error Message and Status Code
-    formAction.value.formErrorMessage = error.message
-    formAction.value.formStatus = error.status
+    formAction.value.formErrorMessage = error.message;
+    formAction.value.formStatus = error.status;
   } else if (data) {
+    // Fetch the user metadata to get role or is_admin
+    const { data: user } = await supabase.auth.getUser();
+    const isAdmin = user?.user_metadata?.is_admin; // Check if the user is admin
+    const role = user?.user_metadata?.role; // Or use role if defined in metadata
+
     // Add Success Message
-    formAction.value.formSuccessMessage = 'Successfully Logged Account.'
-    // Redirect Acct to Dashboard
-    router.replace('/dashboard')
+    formAction.value.formSuccessMessage = 'Successfully Logged In.';
+
+    // Redirect based on the role or isAdmin
+    if (isAdmin || role === 'Librarian') {
+      router.replace('/librarian_dashboard');
+    } else if (!isAdmin || role === 'Borrower') {
+      router.replace('/dashboard');
+    }
   }
 
   // Reset Form
-  refVForm.value?.reset()
+  refVForm.value?.reset();
   // Turn off processing
-  formAction.value.formProcess = false
-}
+  formAction.value.formProcess = false;
+};
+
 
 const onFormSubmit = () => {
   refVForm.value?.validate().then(({ valid}) => {
@@ -78,7 +88,7 @@ const onFormSubmit = () => {
       :rules="[requiredValidator]"
     ></v-text-field>
 
-    <v-select
+    <!-- <v-select
     v-model="formData.role"
       class="pl-10"
       label="Select Role"
@@ -86,7 +96,7 @@ const onFormSubmit = () => {
       variant="outlined"
       density="compact"
       :rules="[requiredValidator]"
-    ></v-select>
+    ></v-select> -->
 
     <v-btn
       class="mt-2 mx-auto d-flex"

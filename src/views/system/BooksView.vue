@@ -1,10 +1,9 @@
-
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useDisplay } from 'vuetify';
 import axios from 'axios';
 import LogoutModal from '../auth/LogoutModal.vue';
-import { supabase } from '@/utils/supabase';
+import { supabase } from '@/utils/supabase'
 import { getInitials } from '@/utils/helpers';
 // Reactive variables for user information
 const firstName = ref('');
@@ -61,7 +60,7 @@ const fetchBooks = async (subject) => {
       query = 'book OR novel OR literature OR fiction OR biography OR art OR history OR mystery OR fantasy OR programming';
     } else {
       query = `subject:${subject}`;
-    }
+    } 
 
     const { data } = await axios.get(
       `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=40`
@@ -162,72 +161,76 @@ const closeDialog = () => {
 
 const submitForm = async () => {
   if (!selectedBorrowDate.value || !selectedReturnDate.value) {
-      console.error('Please select a borrow and return date');
-      alert('Please select a borrow and return date');
-      return;
-    }
+    console.error('Please select a borrow and return date');
+    alert('Please select a borrow and return date');
+    return;
+  }
 
-  if (new Date(selectedReturnDate.value) <= new Date(selectedBorrowDate.value)) {
+  if (new Date(selectedReturnDate.value) < new Date(selectedBorrowDate.value)) {
     alert('Error: Return date must be later than borrow date.');
     return;
   }
 
-    // Fetch user info (from Supabase)
-    const user = await getUserInformation();
-    if (user) {
-      // Get the user's full name and user_id
-      const userFullName = `${user.firstname} ${user.lastname}`;
-      const userId = user.id; // Get the user's Supabase user ID
+  // Fetch user info (from Supabase)
+  const user = await getUserInformation();
+  if (user) {
+    // Get the user's full name, email, and user_id
+    const userFullName = `${user.firstname} ${user.lastname}`;
+    const userEmail = user.email || 'No Email'; // Retrieve the user's email
+    const userId = user.id; // Get the user's Supabase user ID
 
+    // Get the book details (from the selected card)
+    const selectedBook = cards.value.find(
+      (card) => card.title === selectedBookTitle.value
+    ); // selectedBookTitle is the title of the selected book
 
-      // Get the book details (from the selected card)
-      const selectedBook = cards.value.find((card) => card.title === selectedBookTitle.value); // selectedBookTitle is the title of the selected book
+    // Ensure the book is found
+    if (selectedBook) {
+      const bookDetails = {
+        title: selectedBook.title,
+        author: selectedBook.author,
+        cover: selectedBook.src,
+      };
+      const bookId = selectedBook.id; // Assuming each book has a unique ID
 
-      // Ensure the book is found
-      if (selectedBook) {
-        const bookDetails = {
-          title: selectedBook.title,
-          author: selectedBook.author,
-          cover: selectedBook.src,
-        };
-        const bookId = selectedBook.id; // Assuming each book has a unique ID
+      // Prepare transaction data with the status set to 'Pending'
+      const transactionData = {
+        book_title: selectedBookTitle.value,
+        user_info: userFullName,
+        email: userEmail, // Add email here
+        borrowed_date: selectedBorrowDate.value,
+        return_date: selectedReturnDate.value,
+        status: 'Pending', // Automatically set status to 'Pending'
+      };
 
-        // Prepare transaction data
-        const transactionData = {
-      book_title: selectedBookTitle.value,
-      user_info: userFullName,
-      borrowed_date: selectedBorrowDate.value,
-      return_date: selectedReturnDate.value,
-    };
+      // Save the borrowing data to the 'transactions' table in Supabase
+      try {
+        const { data, error } = await supabase
+          .from('transactions')
+          .insert([transactionData]);
 
-        // Save the borrowing data to the 'transactions' table in Supabase
-        try {
-          const { data, error } = await supabase
-            .from('transactions')
-            .insert([transactionData]);
-
-          if (error) {
-            alert(`Error submitting form: ${error.message}`);
-            console.error('Error saving transaction:', error.message);
-          } else {
-            alert('Form submitted successfully!');
-            console.log('Transaction saved successfully:', data);
-            dialog.value = false; // Close the dialog after successful submission
-          }
-        } catch (error) {
-          alert('Error submitting form.');
-          console.error('Error during submission:', error.message);
+        if (error) {
+          alert('Error submitting form: `${error.message}`');
+          console.error('Error saving transaction:', error.message);
+        } else {
+          alert('Form submitted successfully!');
+          console.log('Transaction saved successfully:', data);
+          dialog.value = false; // Close the dialog after successful submission
         }
-      } else {
-        alert('Error: Book not found.');
-        console.error('Book not found!');
+      } catch (error) {
+        alert('Error submitting form.');
+        console.error('Error during submission:', error.message);
       }
     } else {
-      alert('Error: User not found.');
-      console.error('User not found!');
+      alert('Error: Book not found.');
+      console.error('Book not found!');
     }
-    closeDialog();
-  } 
+  } else {
+    alert('Error: User not found.');
+    console.error('User not found!');
+  }
+  closeDialog();
+};
 </script>
 
 
@@ -244,60 +247,60 @@ const submitForm = async () => {
 
     <!-- Sidebar Navigation Drawer -->
     <v-navigation-drawer
-        v-model="drawer"
-        :temporary="mobile"
-        location="left"
-        :permanent="!mobile"
-        style="background-color: #E7F0DC"
-      >
-      <template v-slot:prepend>
+      v-model="drawer"
+      :temporary="mobile"
+      location="left"
+      :permanent="!mobile"
+      style="background-color: #E7F0DC"
+    >
+    <template v-slot:prepend>
           <v-divider></v-divider>
           <v-list-item
             lines="two"
             subtitle="Logged in"
             :title="`${firstName || '...'} ${lastName || '...'}`"
-          > <template v-slot:prepend>
-          <v-avatar color="primary" size="45">
-            <span class="white--text text-h6">
-              {{ getInitials(firstName, lastName) }}
-            </span>
-          </v-avatar>
-        </template>
-        </v-list-item>
+          >
+            <template v-slot:prepend>
+              <v-avatar color="primary" size="45">
+                <span class="white--text text-h6">
+                  {{ getInitials(firstName, lastName) }}
+                </span>
+              </v-avatar>
+            </template>
+          </v-list-item>
         </template>
 
-        <!-- Navigation Links -->
-        <v-list density="compact" nav>
-          <v-divider></v-divider>
-          <v-list-item
-            class="mt-8 nav-title black-text"
-            prepend-icon="mdi-home"
-            title="Home"
-            @click="drawer = mobile ? false : drawer; $router.push('/dashboard')"
-          ></v-list-item>
-          <v-list-item
-            class="mt-6 nav-title black-text"
-            prepend-icon="mdi-bookshelf"
-            title="Books"
-            @click="drawer = mobile ? false : drawer; $router.push('/books')"
-          ></v-list-item>
-          <v-list-item
-            class="mt-6 nav-title black-text"
-            prepend-icon="mdi-account-credit-card"
-            title="Transaction"
-            @click="drawer = mobile ? false : drawer; $router.push('/transactions')"
-          ></v-list-item>
-    
-          
-          <!-- Logout Link -->
-          <v-list-item
-            class="mt-6 nav-title black-text"
-            prepend-icon="mdi-logout"
-            title="Logout"
-            @click="openLogoutModal"
-          ></v-list-item>
-        </v-list>
-      </v-navigation-drawer>
+      <!-- Navigation Links -->
+      <v-list density="compact" nav>
+        <v-divider></v-divider>
+        <v-list-item
+          class="mt-8 nav-title black-text"
+          prepend-icon="mdi-home"
+          title="Home"
+          @click="drawer = mobile ? false : drawer; $router.push('/dashboard')"
+        ></v-list-item>
+        <v-list-item
+          class="mt-6 nav-title black-text"
+          prepend-icon="mdi-bookshelf"
+          title="Books"
+          @click="drawer = mobile ? false : drawer; $router.push('/books')"
+        ></v-list-item>
+        <v-list-item
+          class="mt-6 nav-title black-text"
+          prepend-icon="mdi-account-credit-card"
+          title="Transaction"
+          @click="drawer = mobile ? false : drawer; $router.push('/transactions')"
+        ></v-list-item>
+        
+        <!-- Logout Link -->
+        <v-list-item
+          class="mt-6 nav-title black-text"
+          prepend-icon="mdi-logout"
+          title="Logout"
+          @click="openLogoutModal"
+        ></v-list-item>
+      </v-list>
+    </v-navigation-drawer>
 
     <!-- Main Content -->
     <v-main class="main-content" style="background-color: aliceblue;">
