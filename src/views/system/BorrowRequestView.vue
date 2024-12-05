@@ -54,46 +54,30 @@ onMounted(async () => {
   }
 });
 
+
 // State for transactions
 const transactions = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const headers = ref([
   { title: 'Book Title', value: 'book_title' },
+  { title: 'User Info', value: 'user_info' },
+  { title: 'Email', value: 'email' },
   { title: 'Borrow Date', value: 'borrowed_date' },
   { title: 'Return Date', value: 'return_date' },
-  { title: 'Status', value: 'status' }, // New status column
+  { title: 'Status', value: 'status' },
+  { title: 'Actions', value: 'actions' }, // New column for Accept/Deny actions
 ]);
-
 // Fetch transactions
 const fetchTransactions = async () => {
   loading.value = true;
   error.value = null;
 
   try {
-    console.log('Fetching user data from Supabase...');
-    const { data: user, error: userError } = await supabase.auth.getUser();
-
-    if (userError) {
-      console.error('Error fetching user data:', userError.message);
-      error.value = 'Failed to fetch user information. Please try again.';
-      return;
-    }
-
-    if (!user || !user.user) {
-      console.warn('No user is currently logged in.');
-      error.value = 'No user is logged in. Please log in to view transactions.';
-      return;
-    }
-
-    const email = user.user.email;
-    console.log('User email fetched:', email);
-
-    console.log('Fetching transactions for the user...');
     const { data, error: fetchError } = await supabase
       .from('transactions')
-      .select('book_title, user_info, borrowed_date, return_date, status') // Include the status field
-      .eq('email', email);
+      .select('id, book_title, user_info, email, borrowed_date, return_date, status')  // Ensure 'id' is included
+      .eq('status', 'Pending');  // Ensure you're fetching pending transactions
 
     if (fetchError) {
       console.error('Supabase query error:', fetchError.message);
@@ -102,19 +86,68 @@ const fetchTransactions = async () => {
     }
 
     if (data && data.length > 0) {
-      console.log('Transactions fetched successfully:', data);
-      transactions.value = data;
+      transactions.value = data;  // Set the reactive transactions array
     } else {
-      console.warn('No transactions found for the user.');
-      transactions.value = [];
+      transactions.value = [];  // If no data, ensure it is an empty array
     }
   } catch (err) {
-    console.error('Unexpected error during transaction fetch:', err.message);
+    console.error('Unexpected error during transaction fetch:', err);
     error.value = 'An unexpected error occurred. Please refresh the page.';
   } finally {
     loading.value = false;
   }
 };
+const handleAccept = async (item) => {
+  try {
+    // First, perform the update operation
+    const { error: updateError } = await supabase
+      .from('transactions')
+      .update({ status: 'confirmed' })
+      .eq('id', item.id);  // Make sure the ID is correct
+
+    if (updateError) {
+      console.error('Error accepting transaction:', updateError.message);
+      return;
+    }
+
+    // Fetch the updated transaction manually
+    const { data, error: fetchError } = await supabase
+      .from('transactions')
+      .select('book_title, user_info, email, borrowed_date, return_date, status')
+      .eq('id', item.id)
+      .single(); // Fetch a single row by ID
+
+    if (fetchError) {
+      console.error('Error fetching updated transaction:', fetchError.message);
+    } else {
+      console.log('Transaction updated:', data);
+      // Optionally, update the local transactions array or state with the new data
+      fetchTransactions(); // Refresh the transactions list
+    }
+  } catch (err) {
+    console.error('Unexpected error accepting transaction:', err);
+  }
+};
+
+
+const handleDeny = async (item) => {
+  try {
+    const { data, error: updateError } = await supabase
+      .from('transactions')
+      .update({ status: 'denied' })
+      .eq('id', item.id);
+
+    if (updateError) {
+      console.error('Error denying transaction:', updateError.message);
+    } else {
+      console.log('Transaction denied:', data);
+      fetchTransactions(); // Refresh the transactions after the update
+    }
+  } catch (err) {
+    console.error('Unexpected error denying transaction:', err);
+  }
+};
+
 // Fetch transactions on component mount
 onMounted(fetchTransactions);
 </script>
@@ -202,11 +235,25 @@ onMounted(fetchTransactions);
             :headers="headers"
             dense
             :loading="loading"
-            >
+            
+            class="responsive-table"
+          >
+            <template v-slot:body-cell.date="{ item }">
+              <!-- Rotate the date text vertically -->
+              <span class="vertical-text">
+                {{ item.date }}
+              </span>
+            </template>
+
             <template v-slot:body-cell.status="{ item }">
               <v-chip :color="item.status === 'confirmed' ? 'green' : 'orange'" text-color="white" small>
                 {{ item.status }}
               </v-chip>
+            </template>
+
+            <template v-slot:item.actions="{ item }">
+              <v-btn @click="handleAccept(item)" color="green" small>Accept</v-btn>
+              <v-btn @click="handleDeny(item)" color="red" small>Deny</v-btn>
             </template>
           </v-data-table>
 
@@ -280,7 +327,7 @@ onMounted(fetchTransactions);
 }
 
 .v-data-table td {
-  text-align: center;
+  text-align: left;
 }
 
 .v-data-table .v-data-table__wrapper {
@@ -309,24 +356,57 @@ onMounted(fetchTransactions);
 
 /* Make tables responsive on mobile */
 @media screen and (max-width: 600px) {
-  .v-data-table .v-data-table__wrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .v-data-table th, .v-data-table td {
-    font-size: 14px;
-    padding: 12px;
-  }
-
   .content-area {
-    margin-left: 0;
-    margin-right: 0;
-    padding: 10px;
+    margin-left: 0; /* Remove left margin on mobile */
   }
 
-  .v-list-item {
-    font-size: 1rem;
+  .v-data-table .v-data-table__wrapper {
+    display: block;
+    width: 100%; /* Ensure the table takes full width */
   }
+
+  .v-data-table td,
+  .v-data-table th {
+    padding: 12px 10px; /* Adjust padding for smaller screens */
+  }
+
+  .v-card-title {
+    font-size: 24px; /* Reduce font size for mobile */
+  }
+
+  .nav-title {
+    font-size: 1.2rem; /* Make nav items more compact */
+  }
+
+  .v-data-table__wrapper {
+    overflow-x: auto; /* Allow horizontal scrolling */
+  }
+
+  /* Adjust table layout on mobile */
+  .v-data-table td,
+  .v-data-table th {
+    white-space: nowrap; /* Ensure content fits inside */
+  }
+
+  /* Make sure the actions column is stacked vertically on mobile */
+  .v-data-table .v-data-table__column--actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Adjust text alignment for better visibility */
+  .v-data-table .v-data-table__column--status {
+    text-align: center;
+  }
+}
+
+/* Vertical text for date column */
+.vertical-text {
+  display: inline-block;
+  transform: rotate(-90deg);
+  transform-origin: bottom left;
+  white-space: nowrap;
+  padding-left: 10px;
 }
 </style>
