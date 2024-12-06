@@ -32,7 +32,7 @@ const { mobile } = useDisplay()
       <RegisterForm></RegisterForm>
      
       <v-divider class="my-5">
-        <h6>Have an existing account? <router-link  to="/" class="text-indigo-darken-2 font-weight-black">Login Here</router-link></h6>
+        <h6>Have an existing account? <router-link  to="/login" class="text-indigo-darken-2 font-weight-black">Login Here</router-link></h6>
       </v-divider>
     </v-card-text>
   </v-card>

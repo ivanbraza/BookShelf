@@ -262,7 +262,7 @@ const submitForm = async () => {
       </v-btn>
       <v-spacer></v-spacer>
       <v-img
-        src="/images/logo2.png"
+        src="/images/logo.png"
         class="mx-3 my-4"
         max-width="50px"
         alt="Logo"

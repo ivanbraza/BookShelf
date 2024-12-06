@@ -183,7 +183,7 @@ onMounted(fetchTransactions);
         <v-icon>mdi-menu</v-icon>
       </v-btn>
       <v-spacer></v-spacer>
-      <v-img src="/images/bookshelf-logo.jpg" class="mx-3 my-4" max-width="50px"></v-img>
+      <v-img src="/images/logo.png" class="mx-3 my-4" max-width="50px"></v-img>
     </v-app-bar>
 
     <!-- Main Layout -->
@@ -391,7 +391,7 @@ onMounted(fetchTransactions);
     <!-- Footer -->
     <v-footer class="font-weight-bold" elevation="24" app style="background-color: #232D3F;">
       <v-row justify="start">
-        <v-col class="text-right py-2" style="color: wheat;">2024 - Book Shelf Transactions</v-col>
+        <v-col class="text-right py-2" style="color: white;">2024 - Book Shelf</v-col>
       </v-row>
     </v-footer>
 

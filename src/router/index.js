@@ -7,7 +7,7 @@ import Transactionsview from '@/views/system/Transactionsview.vue'
 import RegisterVue from '@/views/auth/RegisterVue.vue'
 import { getUserInformation, isAuthenticated } from '@/utils/supabase'
 import BorrowRequestView from '@/views/system/BorrowRequestView.vue'
-import AdminDashboardView from '@/views/system/LibrarianDashboardView.vue'
+// import AdminDashboardView from '@/views/system/LibrarianDashboardView.vue'
 import LibrarianDashboardView from '@/views/system/LibrarianDashboardView.vue'
 import AdminTransactionView from '@/views/system/AdminTransactionView.vue'
 

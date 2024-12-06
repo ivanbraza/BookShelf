@@ -290,7 +290,7 @@ const cardColor = key =>
 /* App Bar */
 .app-bar {
   background: #2e3b55;
-  color: white;
+  color: black;
 }
 .bg {
   background-color: #232d3f;

@@ -158,7 +158,7 @@ onMounted(fetchTransactions)
       </v-btn>
       <v-spacer></v-spacer>
       <v-img
-        src="/images/bookshelf-logo.jpg"
+        src="/images/logo.png"
         class="mx-3 my-4"
         max-width="50px"
       ></v-img>
@@ -362,8 +362,8 @@ onMounted(fetchTransactions)
       style="background-color: #232d3f"
     >
       <v-row justify="start">
-        <v-col class="text-right py-2" style="color: wheat"
-          >2024 - Book Shelf Transactions</v-col
+        <v-col class="text-right py-2" style="color: white"
+          >2024 - Book Shelf</v-col
         >
       </v-row>
     </v-footer>
