@@ -60,7 +60,7 @@ const fetchBooks = async (subject) => {
       query = 'book OR novel OR literature OR fiction OR biography OR art OR history OR mystery OR fantasy OR programming';
     } else {
       query = `subject:${subject}`;
-    } 
+    }
 
     const { data } = await axios.get(
       `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=40`
@@ -110,12 +110,14 @@ async function getUserInformation() {
     return {
       firstname: user.user_metadata.firstname || 'Guest',
       lastname: user.user_metadata.lastname || 'User',
+      email: user.email, // Add email here
     };
   } else {
     console.warn('No user data found.');
     return null;
   }
 }
+
 
 // Lifecycle hook to fetch both user and books data on mount
 onMounted(async () => {
@@ -166,7 +168,7 @@ const submitForm = async () => {
     return;
   }
 
-  if (new Date(selectedReturnDate.value) < new Date(selectedBorrowDate.value)) {
+  if (new Date(selectedReturnDate.value) <= new Date(selectedBorrowDate.value)) {
     alert('Error: Return date must be later than borrow date.');
     return;
   }
@@ -193,14 +195,14 @@ const submitForm = async () => {
       };
       const bookId = selectedBook.id; // Assuming each book has a unique ID
 
-      // Prepare transaction data with the status set to 'Pending'
+      // Prepare transaction data
       const transactionData = {
         book_title: selectedBookTitle.value,
         user_info: userFullName,
         email: userEmail, // Add email here
         borrowed_date: selectedBorrowDate.value,
         return_date: selectedReturnDate.value,
-        status: 'Pending', // Automatically set status to 'Pending'
+        status: 'Pending',
       };
 
       // Save the borrowing data to the 'transactions' table in Supabase
@@ -210,7 +212,7 @@ const submitForm = async () => {
           .insert([transactionData]);
 
         if (error) {
-          alert('Error submitting form: `${error.message}`');
+          // alert(Error submitting form: ${error.message});
           console.error('Error saving transaction:', error.message);
         } else {
           alert('Form submitted successfully!');
@@ -231,6 +233,7 @@ const submitForm = async () => {
   }
   closeDialog();
 };
+
 </script>
 
 
@@ -350,18 +353,20 @@ const submitForm = async () => {
           v-else
         >
           <!-- Dropdown for Categories -->
-          <v-col cols="4">
+          <v-row justify="space-between" align="center" class="mobile-toolbar py-2">
+          <v-col cols="4" class="dropdown-col">
             <select v-model="tabs">
              <option v-for="category in categories" 
              :key="category.subject" 
              :value="category.subject">
+             
             {{ category.name }}
            </option>
            </select>
           </v-col>
 
           <!-- Search Bar -->
-          <v-col cols="8">
+          <v-col cols="6" class="search-bar-col">
             <v-text-field
               v-model="searchQuery"
               label="Search"
@@ -369,11 +374,13 @@ const submitForm = async () => {
               dense
               outlined
               clearable
+               menu-props="{ offset-y: true }"
             ></v-text-field>
           </v-col>
         </v-row>
+        </v-row>
       </v-container>
-
+    
       <!-- Cards -->
       <v-container>
         <v-row>
@@ -547,22 +554,52 @@ const submitForm = async () => {
 /* Mobile Toolbar */
 .mobile-toolbar {
   background-color: aliceblue;
-  padding: 5px 15px;
-  border-radius: 0px;
-  z-index: 10;
-  position: fixed;
-  width: 100%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Slight shadow for separation */
+  padding: 10px;
+  border-radius: 5px;
+  width: 110%;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Slight shadow for separation */
+}
+
+.mobile-toolbar .dropdown-col {
+  margin-right: 20px; /* Add spacing between dropdown and search bar */
 }
 
 .mobile-toolbar .v-select,
 .mobile-toolbar .v-text-field {
-  margin: 5px;
-  width: 100%;
-  color: inherit;
+  width: 105%; /* Ensure full width within their containers */
+  font-size: 0.9rem; /* Slightly smaller font for mobile */
+}
+
+.mobile-toolbar .v-select .v-input__control,
+.mobile-toolbar .v-text-field .v-input__control {
+  min-height: 40px; /* Adjust height for better touch support */
+}
+
+.mobile-toolbar .v-select .v-overlay__content {
+  top: 50px; /* Ensure dropdown aligns below the toolbar */
+  left: 0;
+  z-index: 10; /* Keep it above other elements */
+}
+
+/* Adjust category dropdown and search field alignment */
+@media (max-width: 768px) {
+  .mobile-toolbar {
+    flex-direction:row;
+    padding: 3px;
+  }
+
+  .dropdown-col,
+  .search-bar-col {
+    flex: 1; /* Both elements occupy equal space */
+  }
+
+  .mobile-toolbar .v-select,
+  .mobile-toolbar .v-text-field {
+    margin: 0; /* Remove extra margin */
+  }
 }
 
 /* Footer */

@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { formActionDefault, supabase } from '@/utils/supabase';
 import { requiredValidator, emailValidator } from '@/utils/validators'
 import { useRouter } from 'vue-router'
-
+import AlertNotification from '@/components/common/AlertNotification.vue'
 const router = useRouter()
 
 
@@ -67,6 +67,11 @@ const onFormSubmit = () => {
 </script>
 
 <template>
+  <AlertNotification
+    :form-success-message="formAction.formSuccessMessage"
+    :form-error-message="formAction.formErrorMessage"
+  ></AlertNotification>
+  
   <v-form ref="refVForm"@submit.prevent="onFormSubmit" class="pr-4">
     <v-text-field
       v-model="formData.email"
@@ -87,6 +92,8 @@ const onFormSubmit = () => {
       @click:append-inner="isPasswordVisible = !isPasswordVisible"
       :rules="[requiredValidator]"
     ></v-text-field>
+
+    
 
     <!-- <v-select
     v-model="formData.role"
