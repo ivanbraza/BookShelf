@@ -168,7 +168,7 @@ const submitForm = async () => {
     return;
   }
 
-  if (new Date(selectedReturnDate.value) <= new Date(selectedBorrowDate.value)) {
+  if (new Date(selectedReturnDate.value) < new Date(selectedBorrowDate.value)) {
     alert('Error: Return date must be later than borrow date.');
     return;
   }
