@@ -22,6 +22,7 @@
         :temporary="mobile"
         :permanent="!mobile"
         class="sidebar"
+        style="background-color: #E7F0DC"
       >
         <template v-slot:prepend>
           <v-divider></v-divider>
@@ -67,7 +68,7 @@
             title="Transaction"
             @click="
               drawer = mobile ? false : drawer;
-              $router.push('/admin_transaction')
+              $router.push('/admin_transactions')
             "
           ></v-list-item>
           <v-list-item
@@ -290,7 +291,7 @@ const cardColor = key =>
 /* App Bar */
 .app-bar {
   background: #2e3b55;
-  color: black;
+  color: white
 }
 .bg {
   background-color: #232d3f;

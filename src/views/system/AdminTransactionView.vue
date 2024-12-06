@@ -73,11 +73,13 @@ const transactions = ref([])
 const loading = ref(true)
 const error = ref(null)
 const headers = ref([
+  { title: 'User Info', value: 'user_info' },
   { title: 'Book Title', value: 'book_title' },
   { title: 'Borrow Date', value: 'borrowed_date' },
   { title: 'Return Date', value: 'return_date' },
   { title: 'Status', value: 'status' },
   { title: 'Actions', value: 'actions' }, // New actions column
+  { title: 'Penalty', value: 'penalties'}
 ])
 
 // Fetch transactions
@@ -150,7 +152,7 @@ onMounted(fetchTransactions)
       </v-btn>
       <v-spacer></v-spacer>
       <v-img
-        src="./images/logo.png"
+        src="/images/bookshelf-logo.jpg"
         class="mx-3 my-4"
         max-width="50px"
       ></v-img>
@@ -289,7 +291,7 @@ onMounted(fetchTransactions)
       </v-navigation-drawer>
 
       <v-container class="content-area px-auto py-auto mt-16">
-        <v-container elevation="4">
+        <v-container class="border-md" elevation="4">
           <v-card-title
             class="font-weight-bold text-center text-secondary"
             style="font-size: 32px"
@@ -310,74 +312,77 @@ onMounted(fetchTransactions)
 
           <!-- Transactions Table -->
           <v-data-table
-            :items="transactions"
-            :headers="headers"
-            dense
-            :loading="loading"
-            class="responsive-table"
-            hide-default-header
-          >
-            <template v-slot:body="{ items }">
-              <template v-for="item in items" :key="item.id">
-                <!-- Card View on Mobile -->
-                <div class="table-card" v-if="mobile">
-                  <div class="table-card-field">
-                    <span class="field-label">Book Title:</span>
-                    <span class="field-value">{{ item.book_title }}</span>
-                  </div>
-                  <div class="table-card-field">
-                    <span class="field-label">Borrow Date:</span>
-                    <span class="field-value">{{ item.borrowed_date }}</span>
-                  </div>
-                  <div class="table-card-field">
-                    <span class="field-label">Return Date:</span>
-                    <span class="field-value">{{ item.return_date }}</span>
-                  </div>
-                  <div class="table-card-field">
-                    <span class="field-label">Status:</span>
-                    <v-chip
-                      :color="item.status === 'confirmed' ? 'green' : 'orange'"
-                      text-color="white"
-                      small
-                    >
-                      {{ item.status }}
-                    </v-chip>
-                  </div>
-                  <div class="table-card-field">
-                    <v-btn
-                      @click="
-                        markAsReturned(item)
-                       "
-                      color="green"
-                      small
-                      >Returned</v-btn
-                    >
-                  </div>
-                </div>
+  :items="transactions"
+  :headers="headers"
+  dense
+  :loading="loading"
+  class="responsive-table"
+  :hide-default-header="mobile"
+>
+  <!-- Display headers only on non-mobile (desktop) screens -->
+  <template v-if="!mobile" v-slot:header>
+    <thead>
+      <tr>
+        <th v-for="header in headers" :key="header.value">{{ header.title }}</th>
+      </tr>
+    </thead>
+  </template>
 
-                <!-- Default Table Row View for Larger Screens -->
-                <tr v-else>
-                  <td>{{ item.book_title }}</td>
-                  <td>{{ item.borrowed_date }}</td>
-                  <td>{{ item.return_date }}</td>
-                  <td>
-                    <v-chip
-                      :color="item.status === 'confirmed' ? 'green' : 'orange'"
-                      text-color="white"
-                      small
-                    >
-                      {{ item.status }}
-                    </v-chip>
-                  </td>
-                  <td>
-                    <v-btn @click="markAsReturned(item)" color="green" small
-                      >Returned</v-btn
-                    >
-                  </td>
-                </tr>
-              </template>
-            </template>
-          </v-data-table>
+  <template v-slot:body="{ items }">
+    <template v-for="item in items" :key="item.id">
+      <!-- Card View on Mobile -->
+      <div class="table-card" v-if="mobile">
+        <div class="table-card-field">
+          <span class="field-label">Book Title:</span>
+          <span class="field-value">{{ item.book_title }}</span>
+        </div>
+        <div class="table-card-field">
+          <span class="field-label">Borrow Date:</span>
+          <span class="field-value">{{ item.borrowed_date }}</span>
+        </div>
+        <div class="table-card-field">
+          <span class="field-label">Return Date:</span>
+          <span class="field-value">{{ item.return_date }}</span>
+        </div>
+        <div class="table-card-field">
+          <span class="field-label">Status:</span>
+          <v-chip
+            :color="item.status === 'confirmed' ? 'green' : 'orange'"
+            text-color="white"
+            small
+          >
+            {{ item.status }}
+          </v-chip>
+        </div>
+        <div class="table-card-field">
+          <v-btn @click="markAsReturned(item)" color="green" small>Returned</v-btn>
+        </div>
+      </div>
+
+      <!-- Default Table Row View for Larger Screens -->
+      <tr v-else>
+        <td>{{ item.user_info }}</td>
+        <td>{{ item.book_title }}</td>
+        <td>{{ item.borrowed_date }}</td>
+        <td>{{ item.return_date }}</td>
+        <td>
+          <v-chip
+            :color="item.status === 'confirmed' ? 'green' : 'orange'"
+            text-color="white"
+            small
+          >
+            {{ item.status }}
+          </v-chip>
+        </td>
+        <td>
+          <v-btn @click="markAsReturned(item)" color="green" small>Returned</v-btn>
+        </td>
+        <td>{{ item.penalties }}</td>
+      </tr>
+    </template>
+  </template>
+</v-data-table>
+
           <!-- Message if no transactions -->
           <v-alert
             v-if="!loading && transactions.length === 0"
@@ -411,7 +416,8 @@ onMounted(fetchTransactions)
 
 <style scoped>
 .app-bar {
-  z-index: 1000;
+  background: #2e3b55;
+  color: white;
 }
 
 .v-footer {
@@ -448,22 +454,32 @@ onMounted(fetchTransactions)
   font-size: 16px;
 }
 
+/* Added styles for table outlines and hover effects */
+.v-data-table {
+  border: 1px solid #ccc; /* Outer border for the table */
+  border-radius: 8px;
+}
+
 .v-data-table td,
 .v-data-table th {
   padding: 15px 16px;
-  border-bottom: 1px solid #ddd;
+  border: 1px solid #ddd; /* Inner borders for cells */
+  text-align: center;
 }
 
-.v-data-table .row-hover:hover {
-  background-color: wheat;
+.v-data-table th {
+  background-color: #f4f4f4; /* Light background for headers */
+  font-weight: bold;
+  color: #232624; /* Header text color */
 }
 
-.v-data-table td {
-  text-align: left;
+.v-data-table tbody tr:hover {
+  background-color: cornflowerblue; /* Highlight row on hover */
 }
 
 .v-data-table .v-data-table__wrapper {
-  border-radius: 10px;
+  border-radius: 8px;
+  overflow: hidden; /* Ensures table fits nicely in the card */
 }
 
 .v-card {
@@ -533,6 +549,7 @@ onMounted(fetchTransactions)
   }
 }
 
+
 /* Vertical text for date column */
 .vertical-text {
   display: inline-block;
@@ -577,5 +594,12 @@ onMounted(fetchTransactions)
   .table-card {
     display: block;
   }
+}
+
+.v-card-title {
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  color: #232624;
+  font-size: 28px;
 }
 </style>

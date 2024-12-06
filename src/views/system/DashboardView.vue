@@ -17,9 +17,8 @@
       <v-navigation-drawer
         v-model="drawer"
         :temporary="mobile"
-        location="left"
         :permanent="!mobile"
-        style="background-color: #E7F0DC"
+        class="sidebar"
       >
       <template v-slot:prepend>
           <v-divider></v-divider>
@@ -491,67 +490,87 @@
   <v-card class="light-blue-bg white--text">
     <v-card-title class="headline text-center">
       <v-icon class="mr-2" size="36">mdi-account-group</v-icon>
-      Meet the Developers
+      <strong>Meet the Developers</strong>
     </v-card-title>
     <v-card-text>
       <v-container>
         <v-row justify="center" align="center" class="text-center">
-          
-          <!-- System Analyst -->
-          <v-col cols="12" md="4" class="d-flex flex-column align-items-center text-center">
-            <v-img src="./images/mi.jpg" height="100" width="100" class="rounded-circle mb-3" style="border: 4px solid white; padding: 5px; margin-bottom: px;"></v-img>
-            <h4 class="my-3 font-weight-black">MICHELLE BORROMEO</h4>
-            <p class="mb-1"><strong>System Analyst</strong></p>
-            <v-row justify="center" class="social-icons" style="padding-top: 15px;">
-              <v-btn icon href="https://michelleborromeo.github.io" target="_blank">
-                <v-icon>mdi-earth</v-icon>
-              </v-btn>
-              <v-btn icon href="https://github.com/michelleborromeo" target="_blank">
-                <v-icon>mdi-github</v-icon>
-              </v-btn>
-              <v-btn icon href="https://www.linkedin.com/in/michelle-borromeo-a48a582aa/" target="_blank">
-                <v-icon>mdi-linkedin</v-icon>
-              </v-btn>
-            </v-row>
-          </v-col>
+  <!-- System Analyst -->
+  <v-col cols="12" sm="4" class="text-center">
+    <v-img
+      src="./images/mi.jpg"
+      height="100"
+      width="100"
+      class="rounded-circle"
+      style="margin: 0 auto; border: 4px solid white; padding: 5px;">
+    </v-img>
+    <h4 class="mt-3 mb-1">MICHELLE BORROMEO</h4>
+    <p>System Analyst</p>
+    <v-row justify="center" class="social-icons" style="padding-top: 15px;">
+      <v-btn icon href="https://michelleborromeo.github.io" target="_blank">
+        <v-icon>mdi-earth</v-icon>
+      </v-btn>
+      <v-btn icon href="https://github.com/michelleborromeo" target="_blank">
+        <v-icon>mdi-github</v-icon>
+      </v-btn>
+      <v-btn icon href="https://www.linkedin.com/in/michelle-borromeo-a48a582aa/" target="_blank">
+        <v-icon>mdi-linkedin</v-icon>
+      </v-btn>
+    </v-row>
+  </v-col>
 
-          <!-- Frontend Developer -->
-          <v-col cols="12" md="4" class="d-flex flex-column align-items-center text-center">
-            <v-img src="./images/ivan.jpg" height="100" width="100" class="rounded-circle mb-3" style="border: 4px solid white; padding: 5px; margin-bottom: 10px;"></v-img>
-            <h4 class="my-3 font-weight-black">IVAN BRAZA</h4>
-            <p class="mb-1"><strong>Frontend Developer</strong></p>
-            <v-row justify="center" class="social-icons" style="padding-top: 15px;">
-              <v-btn icon href="https://ivanbraza.github.io/" target="_blank">
-                <v-icon>mdi-earth</v-icon>
-              </v-btn>
-              <v-btn icon href="https://github.com/ivanbraza" target="_blank">
-                <v-icon>mdi-github</v-icon>
-              </v-btn>
-              <v-btn icon href="https://www.linkedin.com/in/ivan-braza-958632328/" target="_blank">
-                <v-icon>mdi-linkedin</v-icon>
-              </v-btn>
-            </v-row>
-          </v-col>
+  <!-- Frontend Developer -->
+  <v-col cols="12" sm="4" class="text-center">
+    <v-img
+      src="./images/ivan.jpg"
+      height="100"
+      width="100"
+      class="rounded-circle"
+      style="margin: 0 auto; border: 4px solid white; padding: 5px;">
+    </v-img>
+    <h4 class="mt-3 mb-1">IVAN BRAZA</h4>
+    <p>Frontend Developer</p>
+    <v-row justify="center" class="social-icons" style="padding-top: 15px;">
+      <v-btn icon href="https://ivanbraza.github.io/" target="_blank">
+        <v-icon>mdi-earth</v-icon>
+      </v-btn>
+      <v-btn icon href="https://github.com/ivanbraza" target="_blank">
+        <v-icon>mdi-github</v-icon>
+      </v-btn>
+      <v-btn icon href="https://www.linkedin.com/in/ivan-braza-958632328/" target="_blank">
+        <v-icon>mdi-linkedin</v-icon>
+      </v-btn>
+    </v-row>
+  </v-col>
 
-          <!-- Lead Developer -->
-          <v-col cols="12" md="4" class="d-flex flex-column align-items-center text-center">
-            <v-img src="./images/Althea.jpg" height="100" width="100" class="rounded-circle mb-3" style="border: 4px solid white; padding: 5px; margin-bottom: 10px;"></v-img>
-            <h4 class="my-3 font-weight-black">ALTHEA BUNA</h4>
-            <p class="mb-1"><strong>Lead Developer</strong></p>
-            <v-row justify="center" class="social-icons" style="padding-top: 15px;">
-              <v-btn icon href="https://althealorainebuna.github.io" target="_blank">
-                <v-icon>mdi-earth</v-icon>
-              </v-btn>
-              <v-btn icon href="https://github.com/althealorainebuna" target="_blank">
-                <v-icon>mdi-github</v-icon>
-              </v-btn>
-              <v-btn icon href="https://www.linkedin.com/in/althea-loraine-buna-77a396340/" target="_blank">
-                <v-icon>mdi-linkedin</v-icon>
-              </v-btn>
-            </v-row>
-          </v-col>
+  <!-- Lead Developer -->
+  <v-col cols="12" sm="4" class="text-center">
+    <v-img
+      src="./images/Althea.jpg"
+      height="100"
+      width="100"
+      class="rounded-circle"
+      style="margin: 0 auto; border: 4px solid white; padding: 5px;">
+    </v-img>
+    <h4 class="mt-3 mb-1">ALTHEA BUNA</h4>
+    <p>Lead Developer</p>
+    <v-row justify="center" class="social-icons" style="padding-top: 15px;">
+      <v-btn icon href="https://althealorainebuna.github.io" target="_blank">
+        <v-icon>mdi-earth</v-icon>
+      </v-btn>
+      <v-btn icon href="https://github.com/althealorainebuna" target="_blank">
+        <v-icon>mdi-github</v-icon>
+      </v-btn>
+      <v-btn icon href="https://www.linkedin.com/in/althea-loraine-buna-77a396340/" target="_blank">
+        <v-icon>mdi-linkedin</v-icon>
+      </v-btn>
+    </v-row>
+  </v-col>
+</v-row>
 
-        </v-row>
+
+
+
       </v-container>
     </v-card-text>
     <v-card-actions>
@@ -673,7 +692,8 @@ const closeAboutDialog = () => {
 }
 
 .app-bar {
-  z-index: 1000;
+  background: #2e3b55;
+  color: white;
 }
 
 .v-footer {
@@ -838,6 +858,23 @@ h4 {
 
 .social-icons v-btn v-icon {
   font-size: 24px;
+}
+/* Ensure everything centers in the modal */
+.text-center {
+  text-align: center !important;
+}
+
+.v-img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.v-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 
