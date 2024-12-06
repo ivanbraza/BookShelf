@@ -30,28 +30,28 @@
         </template>
 
         <!-- Navigation Links -->
-        <v-list nav dense>
+        <v-list density="compact" nav>
           <v-divider></v-divider>
           <v-list-item
-            class="nav-link"
+            class="mt-8 nav-title black-text"
             prepend-icon="mdi-home"
             title="Home"
-            @click="navigateTo('/librarian_dashboard')"
+            @click="drawer = mobile ? false : drawer; $router.push('/librarian_dashboard')"
           ></v-list-item>
           <v-list-item
-            class="nav-link"
+            class="mt-6 nav-title black-text"
             prepend-icon="mdi-book-plus"
-            title="Borrow Requests"
-            @click="navigateTo('/borrow_request')"
+            title="Books"
+            @click="drawer = mobile ? false : drawer; $router.push('/borrow_request')"
           ></v-list-item>
           <v-list-item
-            class="nav-link"
+            class="mt-6 nav-title black-text"
             prepend-icon="mdi-account-credit-card"
-            title="Transactions"
-            @click="navigateTo('/admin_transactions')"
+            title="Transaction"
+            @click="drawer = mobile ? false : drawer; $router.push('/admin_transaction')"
           ></v-list-item>
           <v-list-item
-            class="nav-link"
+            class="mt-6 nav-title black-text"
             prepend-icon="mdi-logout"
             title="Logout"
             @click="openLogoutModal"
@@ -249,6 +249,14 @@ const cardColor = (key) => ({
   justify-content: center;
   gap: 20px; /* Add spacing between cards */
 }
+
+.nav-title {
+  font-family: 'Merriweather', serif;
+  font-size: 1.4rem;
+  font-weight: 1000;
+  margin: 0;
+}
+
 
 /* Statistics Cards */
 .stats-card {
