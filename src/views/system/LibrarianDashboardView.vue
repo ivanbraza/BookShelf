@@ -1,67 +1,57 @@
-
 <template>
   <v-app>
     <!-- App Bar -->
-    <v-app-bar class="app-bar bg" elevation="4">
+    <v-app-bar class="app-bar" elevation="4">
       <v-btn v-if="mobile" icon @click="drawer = !drawer">
         <v-icon>mdi-menu</v-icon>
       </v-btn>
       <v-spacer></v-spacer>
-      <v-img src="/images/logo.png" class="mx-3 my-4" max-width="50px"></v-img>
-      <!-- Logout Button in App Bar -->
+      <v-img src="/images/logo.png" alt="Logo" class="mx-3 my-4" max-width="50px"></v-img>
     </v-app-bar>
 
-    <!-- Main Content -->
+    <!-- Main Layout -->
     <v-row class="main-container">
-      <!-- Sidebar Navigation Drawer -->
+      <!-- Sidebar -->
       <v-navigation-drawer
         v-model="drawer"
         :temporary="mobile"
-        location="left"
         :permanent="!mobile"
-        style="background-color: #E7F0DC"
+        class="sidebar"
       >
-      <template v-slot:prepend>
+        <template v-slot:prepend>
           <v-divider></v-divider>
-          <v-list-item
-            lines="two"
-            subtitle="Logged in"
-            :title="`${firstName || '...'} ${lastName || '...'}`"
-          > <template v-slot:prepend>
-          <v-avatar color="primary" size="45">
-            <span class="white--text text-h6">
-              {{ getInitials(firstName, lastName) }}
-            </span>
-          </v-avatar>
-        </template>
-        </v-list-item>
+          <v-list-item lines="two" :title="`${firstName || '...'} ${lastName || '...'}`" subtitle="Logged in">
+            <template v-slot:prepend>
+              <v-avatar color="primary" size="45">
+                <span class="white--text text-h6">{{ getInitials(firstName, lastName) }}</span>
+              </v-avatar>
+            </template>
+          </v-list-item>
         </template>
 
         <!-- Navigation Links -->
-        <v-list density="compact" nav>
+        <v-list nav dense>
           <v-divider></v-divider>
           <v-list-item
-            class="mt-8 nav-title black-text"
+            class="nav-link"
             prepend-icon="mdi-home"
             title="Home"
-            @click="drawer = mobile ? false : drawer; $router.push('/librarian_dashboard')"
+            @click="navigateTo('/librarian_dashboard')"
           ></v-list-item>
           <v-list-item
-            class="mt-6 nav-title black-text"
+            class="nav-link"
             prepend-icon="mdi-book-plus"
             title="Borrow Requests"
-            @click="drawer = mobile ? false : drawer; $router.push('/borrow_request')"
+            @click="navigateTo('/borrow_request')"
           ></v-list-item>
           <v-list-item
-            class="mt-6 nav-title black-text"
+            class="nav-link"
             prepend-icon="mdi-account-credit-card"
             title="Transactions"
-            @click="drawer = mobile ? false : drawer; $router.push('/admin_transactions')"
+            @click="navigateTo('/admin_transactions')"
           ></v-list-item>
-          
-          <!-- Logout Link -->
           <v-list-item
-            class="mt-6 nav-title black-text"
+            class="nav-link"
             prepend-icon="mdi-logout"
             title="Logout"
             @click="openLogoutModal"
@@ -69,214 +59,259 @@
         </v-list>
       </v-navigation-drawer>
 
-      <!-- Dashboard Content -->
-
-      <v-main class="content-area bg-3 particle-overlay " >
-        <v-col cols="12" md="9">
-          <v-row justify="center" align="center" class="pa-6">
-            <v-col cols="12">
-              <h1 class="text-center">Library Statistics</h1>
+      <!-- Main Content -->
+      <v-main class="content-area">
+        <v-container>
+          <!-- Hero Section -->
+          <v-row justify="center" align="center" class="hero-section">
+            <v-col cols="12" class="text-center">
+              <h1 class="hero-title">Welcome to the Library Dashboard</h1>
+              <p class="hero-subtitle">Monitor and manage your library operations seamlessly.</p>
             </v-col>
-            <!-- Statistic Cards -->
-            <v-col
-              cols="12"
-              sm="6"
-              md="4"
-              v-for="(value, key) in stats"
-              :key="key"
-            >
-              <v-card class="pa-3" outlined border="black md">
-                <v-icon :color="cardColor(key)" large>{{
-                  getIcon(key)
-                }}</v-icon>
-                <h3>{{ getTitle(key) }}</h3>
-                <p class="text-h4 font-weight-bold">{{ value }}</p>
+          </v-row>
+
+          <!-- Statistics Section -->
+          <v-row justify="center" class="stats-section">
+            <v-col cols="12" sm="6" md="4" v-for="(value, key) in stats" :key="key">
+              <v-card class="stats-card" elevation="24">
+                <v-icon :color="cardColor(key)" class="icon" large>{{ getIcon(key) }}</v-icon>
+                <h3 class="card-title">{{ getTitle(key) }}</h3>
+                <p class="card-value">{{ value }}</p>
               </v-card>
             </v-col>
           </v-row>
-        </v-col>
+        </v-container>
       </v-main>
     </v-row>
+
     <!-- Footer -->
-    <v-footer class="font-weight-bold bg" color="#2e3b55" elevation="4" app>
-      <v-row justify="start">
-        <v-col class="text-right py-2 white-text"> 2024 - Book Shelf </v-col>
+    <v-footer class="footer">
+      <v-row justify="center" class="footer-content">
+        <span>2024 - Book Shelf | All Rights Reserved</span>
       </v-row>
     </v-footer>
+
     <!-- Logout Modal -->
     <LogoutModal ref="logoutModalRef" />
   </v-app>
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
-import { useDisplay } from 'vuetify'
-import LogoutModal from '../auth/LogoutModal.vue'
-import { supabase } from '@/utils/supabase'
-import { getInitials } from '@/utils/helpers'
+import { ref, onMounted } from 'vue';
+import { useDisplay } from 'vuetify';
+import LogoutModal from '../auth/LogoutModal.vue';
+import { supabase } from '@/utils/supabase';
+import { getInitials } from '@/utils/helpers';
 
-// Mobile detection from Vuetify's display composable
-const { mobile } = useDisplay()
-const drawer = ref(!mobile.value)
+const { mobile } = useDisplay();
+const drawer = ref(!mobile.value);
 
-// Logout modal reference
-const logoutModalRef = ref(null)
-const openLogoutModal = () => {
-  logoutModalRef.value?.open()
-}
+// User Information
+const firstName = ref('');
+const lastName = ref('');
 
-// Watch for changes in mobile status
-watch(mobile, isMobile => {
-  if (!isMobile) {
-    drawer.value = true
-  }
-})
+// Modal Handling
+const logoutModalRef = ref(null);
+const openLogoutModal = () => logoutModalRef.value?.open();
 
-// Reactive variables
-const firstName = ref('')
-const lastName = ref('')
-
-// Fetch user information
+// Fetch User Data
 async function getUserInformation() {
-  const { data, error } = await supabase.auth.getUser()
-
-  if (error) {
-    console.error('Error fetching user information:', error.message)
-    return null
-  }
-
-  if (data.user) {
-    const { user } = data
-    console.log('Fetched user data:', user)
-    return {
-      firstname: user.user_metadata.firstname || 'Guest',
-      lastname: user.user_metadata.lastname || 'User',
-    }
-  } else {
-    console.warn('No user data found.')
-    return null
+  const { data } = await supabase.auth.getUser();
+  if (data?.user) {
+    firstName.value = data.user.user_metadata.firstname || 'Guest';
+    lastName.value = data.user.user_metadata.lastname || 'User';
   }
 }
 
-// Lifecycle hook
-onMounted(async () => {
-  const user = await getUserInformation()
-  if (user) {
-    firstName.value = user.firstname
-    lastName.value = user.lastname
-    console.log('User data set:', {
-      firstName: firstName.value,
-      lastName: lastName.value,
-    })
-  } else {
-    console.error('User not logged in or data not found.')
-  }
-})
-
-// Statistics Data
-const stats = ref({
-  totalBooks: 1500,
-  booksBorrowed: 250,
-  booksReturned: 220,
-  overdueBooks: 30,
-  registeredBorrowers: 400,
-})
-
-// Fetch statistics on load
-onMounted(() => {
-  fetchStatistics()
-})
-
-const fetchStatistics = () => {
-  // Replace this with your API call for dynamic data
+// Statistics
+const stats = ref({});
+const fetchStatistics = async () => {
+  const totalBooks = await fetchTotalBooks();
+  const { booksBorrowed, booksReturned } = await fetchTransactionStats();
   stats.value = {
-    totalBooks: 1500,
-    booksBorrowed: 250,
-    booksReturned: 220,
-    overdueBooks: 30,
-    registeredBorrowers: 400,
-  }
-}
+    totalBooks: totalBooks + booksReturned - booksBorrowed,
+    booksBorrowed,
+    booksReturned,
+  };
+};
 
-// Logout modal logic
-// const logoutModalRef = ref(null)
-// const openLogoutModal = () => {
-//   logoutModalRef.value?.open()
-// }
+const fetchTotalBooks = async () => {
+  const { data } = await supabase.from('books').select('*');
+  return data?.length || 0;
+};
 
-// Navigation Helper
-// const navigateTo = path => {
-//   drawer.value = mobile.value ? false : drawer.value
-//   $router.push(path)
-// }
+const fetchTransactionStats = async () => {
+  const { data } = await supabase.from('transactions').select('status');
+  const booksBorrowed = data.filter((t) => t.status === 'confirmed').length;
+  const booksReturned = data.filter((t) => t.status === 'returned').length;
+  return { booksBorrowed, booksReturned };
+};
 
-// Card Icons & Titles Based on Stats
-const getIcon = key => {
-  const icons = {
-    totalBooks: 'mdi-book',
-    booksBorrowed: 'mdi-book-check',
-    booksReturned: 'mdi-book-return',
-    overdueBooks: 'mdi-alert-circle',
-    registeredBorrowers: 'mdi-account-group',
-  }
-  return icons[key]
-}
+onMounted(() => {
+  getUserInformation();
+  fetchStatistics();
+});
 
-const getTitle = key => {
-  const titles = {
-    totalBooks: 'Total Books',
-    booksBorrowed: 'Books Borrowed',
-    booksReturned: 'Books Returned',
-    overdueBooks: 'Overdue Books',
-    registeredBorrowers: 'Registered Borrowers',
-  }
-  return titles[key]
-}
+const navigateTo = (path) => {
+  $router.push(path);
+};
 
-const cardColor = key => {
-  const colors = {
-    totalBooks: 'primary',
-    booksBorrowed: 'success',
-    booksReturned: 'blue',
-    overdueBooks: 'error',
-    registeredBorrowers: 'teal',
-  }
-  return colors[key]
-}
+const getIcon = (key) => ({
+  totalBooks: 'mdi-book',
+  booksBorrowed: 'mdi-book-check',
+  booksReturned: 'mdi-bookmark-check',
+}[key]);
+
+const getTitle = (key) => ({
+  totalBooks: 'Total Books',
+  booksBorrowed: 'Books Borrowed',
+  booksReturned: 'Books Returned',
+}[key]);
+
+const cardColor = (key) => ({
+  totalBooks: 'primary',
+  booksBorrowed: 'success',
+  booksReturned: 'blue',
+}[key]);
 </script>
 
 <style scoped>
-.v-card {
-  text-align: center;
-}
-
-.nav-title {
-  font-family: 'Merriweather', serif;
-  font-size: 1.4rem;
-  font-weight: 1000;
-  margin: 0;
-}
-
-.v-navigation-drawer {
-  width: 250px;
-  height: 100%;
-}
-
+/* App Bar */
 .app-bar {
-  background-color: #2e3b55;
+  background: #2e3b55;
+  color: white;
 }
 
-.v-icon {
-  font-size: 30px;
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background-color: #f4f5f7;
 }
 
-/* Responsive Design */
+.nav-link {
+  font-weight: bold;
+}
+/* Content Area */
+.content-area {
+  position: relative;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Background Blur */
+.content-area::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('./images/libraryimg.webp') no-repeat center center;
+  background-size: cover;
+  filter: blur(3px); /* Apply blur only to the background */
+  z-index: 0;
+  opacity: 0.8; /* Adjust opacity for better contrast */
+}
+
+/* Hero Section and Stats Section */
+/* Foreground Content */
+.hero-section, 
+.stats-section {
+  position: relative;
+  z-index: 1; /* Ensure content appears above the blurred background */
+}
+
+
+/* Hero Section */
+.hero-section {
+  text-align: center;
+  color: #333;
+  padding-top: 70px;
+  padding-left: 110px;
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  opacity: 100%;
+}
+
+.hero-subtitle {
+  font-size: 1.4rem;
+  color: #000000;
+}
+
+/* Statistics Section */
+.stats-section {
+  margin-top: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px; /* Add spacing between cards */
+}
+
+/* Statistics Cards */
+.stats-card {
+  background: #ced4e7;
+  text-align: center;
+  border-radius: 12px;
+  padding: 20px;
+  transition: transform 0.3s ease;
+  width: 280px; /* Ensure all cards have the same width */
+  height: 200px; /* Ensure all cards have the same height */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-left: 110px;
+  border-radius: 8px; /* Optional: Rounded corners */
+  box-shadow: 8px 4px 8px rgba(215, 23, 23, 0.2); /* Custom shadow */
+}
+
+.stats-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Larger Icon */
+.stats-card v-icon {
+  font-size: 10%; /* Increase icon size */
+  margin-bottom: 10px; /* Add space below the icon */
+}
+
+/* Title Styling */
+.card-title {
+  font-size: 1.5rem;
+  margin: 10px 0;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Value Styling */
+.card-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #020202;
+}
+
 @media (max-width: 600px) {
-  .app-bar {
-    background-color: #2e3b55;
+  .hero-section {
+    padding: 20px;
+    padding-top: 50px;
   }
-  .v-navigation-drawer {
-    background-color: #e7f0dc;
+  .stats-card {
+    margin: 10px;
   }
+}
+
+.icon{
+  font-size: 300%;
+}
+/* Footer */
+.footer {
+  background: #2e3b55;
+  color: white;
+  text-align: center;
+  padding: 10px 0;
 }
 </style>
