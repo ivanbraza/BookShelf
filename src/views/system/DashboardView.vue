@@ -58,15 +58,77 @@
             title="Transaction"
             @click="drawer = mobile ? false : drawer; $router.push('/transactions')"
           ></v-list-item>
-    
-          
           <!-- Logout Link -->
           <v-list-item
             class="mt-6 nav-title black-text"
             prepend-icon="mdi-logout"
             title="Logout"
             @click="openLogoutModal"
+          ></v-list-item><v-list-item
+            class="mt-6 nav-title black-text"
+            prepend-icon="mdi-lock-reset"
+            title="Change Password"
+            @click="openChangePasswordModal"
           ></v-list-item>
+
+          <!-- Change Password Modal -->
+          <v-dialog v-model="changePasswordDialog" max-width="400">
+            <v-card>
+              <v-card-title class="text-h6">Change Password</v-card-title>
+              <v-card-text>
+                <v-form ref="changePasswordForm" v-model="isPasswordFormValid">
+                  <v-text-field
+                    v-model="passwordForm.currentPassword"
+                    label="Current Password"
+                    :type="isPasswordVisible ? 'text' : 'password'"
+                    :append-inner-icon="
+                      isPasswordVisible ? 'mdi-eye' : 'mdi-eye-off'
+                    "
+                    @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                    :rules="[passwordValidator]"
+                  ></v-text-field>
+
+                  <v-text-field
+                    v-model="passwordForm.newPassword"
+                    label="New Password"
+                    :type="isPasswordVisible ? 'text' : 'password'"
+                    :append-inner-icon="
+                      isPasswordVisible ? 'mdi-eye' : 'mdi-eye-off'
+                    "
+                    @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                    :rules="[requiredValidator, passwordValidator]"
+                  ></v-text-field>
+
+                  <v-text-field
+                    v-model="passwordForm.confirmPassword"
+                    label="Confirm New Password"
+                    :type="isPasswordConfirmVisible ? 'text' : 'password'"
+                    :append-inner-icon="
+                      isPasswordConfirmVisible ? 'mdi-eye' : 'mdi-eye-off'
+                    "
+                    @click:append-inner="
+                      isPasswordConfirmVisible = !isPasswordConfirmVisible
+                    "
+                    :rules="[requiredValidator, confirmedValidator(
+                        passwordForm.password,
+                        passwordForm.password_confirmation,
+                      ),]"
+                  ></v-text-field>
+                </v-form>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn text color="red" @click="changePasswordDialog = false">Cancel</v-btn>
+                <v-btn
+                  text color="green"
+                  :disabled="!isPasswordFormValid"
+                  @click="handleChangePassword"
+                >
+                  Submit
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-list>
       </v-navigation-drawer>
 
@@ -349,66 +411,62 @@
 <!--Services Section-->
 
 
-<v-row class="mx-auto my-auto bg-4 py-16" id="services" style="background-color:  #D8E3E7; border-radius: 8px;">
+<v-row class="mx-auto my-auto bg-4 py-16" id="services" style="background-color: #D8E3E7; border-radius: 8px;">
   <v-col class="pl-16 pr-16" cols="12">    
 
-    <h1 class="text-center text-secondary  display-1 font-weight-bold mb-6">
-        <v-icon class="mr-2" size="34">mdi-hand-coin</v-icon>
-       Services</h1>
-      <h3 class="text-center font-weight-medium mb-8">
-      <b class>BookShelf</b> provides the following services:
-      </h3>
+    <h1 class="text-center text-secondary display-1 font-weight-bold mb-6">
+      <v-icon class="mr-2" size="34">mdi-hand-coin</v-icon>
+      Services
+    </h1>
+    <h3 class="text-center font-weight-medium mb-8">
+      <b>BookShelf</b> provides the following services:
+    </h3>
 
     <v-container>
-    <v-row>
-      <!-- Card 1 -->
-      <v-col cols="12" sm="4">
-        <v-card class="text-center pa-4 hover-card">
-          <v-img src="/public/images/LaptopArea.jpg" max-height="145"></v-img>
-          <h3 class="font-weight-bold mt-2">Laptop Area</h3>
-          <p>this service allow clients to plug their laptops on designated area.</p>
-        </v-card>
-      </v-col>
+      <v-row justify="center">
+        <!-- Card 1 -->
+        <v-col cols="12" sm="6" class="d-flex justify-center">
+          <v-card class="text-center pa-4 hover-card" max-width="500">
+            <v-img src="/public/images/LaptopArea.jpg" height="145" width="auto" class="d-flex align-center ml-15"></v-img>
+            <h3 class="font-weight-bold mt-2">Laptop Area</h3>
+            <p>This service allows clients to plug their laptops in a designated area.</p>
+          </v-card>
+        </v-col>
 
-      <!-- Card 2 -->
-      <v-col cols="12" sm="4">
-        <v-card class="text-center pa-4 hover-card">
-          <v-img src="/public/images/LibraryOrientation.png"></v-img>
-          <h3 class="font-weight-bold mt-2">Library Orientation</h3>
-          <p>Provides a good understanding of the library's objectives, facilities, resources and services.</p>
-        </v-card>
-      </v-col>
+        <!-- Card 2 -->
+        <v-col cols="12" sm="6" class="d-flex justify-center">
+          <v-card class="text-center pa-4 hover-card" max-width="500">
+            <v-img src="/public/images/LibraryOrientation.png" height="145" width="auto" class="d-flex align-center"></v-img>
+            <h3 class="font-weight-bold mt-2">Library Orientation</h3>
+            <p>Provides a good understanding of the library's objectives, facilities, resources, and services.</p>
+          </v-card>
+        </v-col>
+      </v-row>
 
-      <!-- Card 3 -->
-      <v-col cols="12" sm="4">
-        <v-card class="text-center pa-4 hover-card">
-          <v-img src="/public/images/BibliographicAssistance.jpg" max-height="145"></v-img>
-          <h3 class="font-weight-bold mt-2">Bibliographic Assistance</h3>
-          <p>Librarians prepare bibliographies on certain subjects upon request by students and faculty.</p>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
+      <v-row justify="center">
+        <!-- Card 3 -->
+        <v-col cols="12" sm="6" class="d-flex justify-center">
+          <v-card class="text-center pa-4 hover-card" max-width="500">
+            <v-img src="/public/images/BibliographicAssistance.jpg" height="145" width="auto" class="d-flex align-center"></v-img>
+            <h3 class="font-weight-bold mt-2">Bibliographic Assistance</h3>
+            <p>Librarians prepare bibliographies on certain subjects upon request by students and faculty.</p>
+          </v-card>
+        </v-col>
 
-  <v-container>
-    <v-row>
-      <!-- Card 4 -->
-      <v-col cols="12" sm="4">
-        <v-card class="text-center pa-4 hover-card">
-          <v-img src="/public/images/AudioVisuaRoom.jpeg" max-height="145" width="auto"></v-img>
-          <h3 class="font-weight-bold mt-2">Audio Visual Room</h3>
-          <p>For viewing and borrowing of digital interactive CDs and DVDs.</p>
-        </v-card>
-      </v-col>
-
-     
-
-    </v-row>
-  </v-container>
-
-
+        <!-- Card 4 -->
+        <v-col cols="12" sm="6" class="d-flex justify-center">
+          <v-card class="text-center pa-4 hover-card" max-width="500">
+            <v-img src="/public/images/AudioVisuaRoom.jpeg" height="145" width="auto" class="d-flex align-center"></v-img>
+            <h3 class="font-weight-bold mt-2">Audio Visual Room</h3>
+            <p>For viewing and borrowing of digital interactive CDs and DVDs.</p>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
   </v-col>
 </v-row>
+
+
 
 
         </v-row>
@@ -435,9 +493,25 @@ import { useDisplay } from 'vuetify';
 import LogoutModal from '../auth/LogoutModal.vue';
 import { supabase } from '@/utils/supabase';
 import { getInitials } from '@/utils/helpers';
+import { useChangePassword } from '@/utils/changer'
+import { confirmedValidator, passwordValidator } from '@/utils/validators'
+
+const isPasswordVisible = ref(false)
+const isPasswordConfirmVisible = ref(false)
+const refVForm = ref()
+
 // Mobile detection from Vuetify's display composable
-const { mobile } = useDisplay();
-const drawer = ref(!mobile.value);
+const { mobile } = useDisplay()
+const drawer = ref(!mobile.value)
+const {
+  changePasswordDialog,
+  isPasswordFormValid,
+  passwordForm,
+  rules,
+  openChangePasswordModal,
+  handleChangePassword,
+} = useChangePassword()
+
 
 // Logout modal reference
 const logoutModalRef = ref(null);

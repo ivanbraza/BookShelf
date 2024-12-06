@@ -6,7 +6,12 @@
         <v-icon>mdi-menu</v-icon>
       </v-btn>
       <v-spacer></v-spacer>
-      <v-img src="/images/logo.png" alt="Logo" class="mx-3 my-4" max-width="50px"></v-img>
+      <v-img
+        src="/images/logo.png"
+        alt="Logo"
+        class="mx-3 my-4"
+        max-width="50px"
+      ></v-img>
     </v-app-bar>
 
     <!-- Main Layout -->
@@ -20,42 +25,123 @@
       >
         <template v-slot:prepend>
           <v-divider></v-divider>
-          <v-list-item lines="two" :title="`${firstName || '...'} ${lastName || '...'}`" subtitle="Logged in">
+          <v-list-item
+            lines="two"
+            :title="`${firstName || '...'} ${lastName || '...'}`"
+            subtitle="Logged in"
+          >
             <template v-slot:prepend>
               <v-avatar color="primary" size="45">
-                <span class="white--text text-h6">{{ getInitials(firstName, lastName) }}</span>
+                <span class="white--text text-h6">{{
+                  getInitials(firstName, lastName)
+                }}</span>
               </v-avatar>
             </template>
           </v-list-item>
         </template>
 
         <!-- Navigation Links -->
-        <v-list nav dense>
+        <v-list density="compact" nav>
           <v-divider></v-divider>
           <v-list-item
-            class="nav-link"
+            class="mt-8 nav-title black-text"
             prepend-icon="mdi-home"
             title="Home"
-            @click="navigateTo('/librarian_dashboard')"
+            @click="
+              drawer = mobile ? false : drawer;
+              $router.push('/librarian_dashboard')
+            "
           ></v-list-item>
           <v-list-item
-            class="nav-link"
+            class="mt-6 nav-title black-text"
             prepend-icon="mdi-book-plus"
-            title="Borrow Requests"
-            @click="navigateTo('/borrow_request')"
+            title="Borrow Request"
+            @click="
+              drawer = mobile ? false : drawer;
+              $router.push('/borrow_request')
+            "
           ></v-list-item>
           <v-list-item
-            class="nav-link"
+            class="mt-6 nav-title black-text"
             prepend-icon="mdi-account-credit-card"
-            title="Transactions"
-            @click="navigateTo('/admin_transactions')"
+            title="Transaction"
+            @click="
+              drawer = mobile ? false : drawer;
+              $router.push('/admin_transaction')
+            "
           ></v-list-item>
           <v-list-item
-            class="nav-link"
+            class="mt-6 nav-title black-text"
             prepend-icon="mdi-logout"
             title="Logout"
             @click="openLogoutModal"
           ></v-list-item>
+          <!-- Sidebar -->
+          <v-list-item
+            class="mt-6 nav-title black-text"
+            prepend-icon="mdi-lock-reset"
+            title="Change Password"
+            @click="openChangePasswordModal"
+          ></v-list-item>
+
+          <!-- Change Password Modal -->
+          <v-dialog v-model="changePasswordDialog" max-width="400">
+            <v-card>
+              <v-card-title class="text-h6">Change Password</v-card-title>
+              <v-card-text>
+                <v-form ref="changePasswordForm" v-model="isPasswordFormValid">
+                  <v-text-field
+                    v-model="passwordForm.currentPassword"
+                    label="Current Password"
+                    :type="isPasswordVisible ? 'text' : 'password'"
+                    :append-inner-icon="
+                      isPasswordVisible ? 'mdi-eye' : 'mdi-eye-off'
+                    "
+                    @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                    :rules="[passwordValidator]"
+                  ></v-text-field>
+
+                  <v-text-field
+                    v-model="passwordForm.newPassword"
+                    label="New Password"
+                    :type="isPasswordVisible ? 'text' : 'password'"
+                    :append-inner-icon="
+                      isPasswordVisible ? 'mdi-eye' : 'mdi-eye-off'
+                    "
+                    @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                    :rules="[requiredValidator, passwordValidator]"
+                  ></v-text-field>
+
+                  <v-text-field
+                    v-model="passwordForm.confirmPassword"
+                    label="Confirm New Password"
+                    :type="isPasswordConfirmVisible ? 'text' : 'password'"
+                    :append-inner-icon="
+                      isPasswordConfirmVisible ? 'mdi-eye' : 'mdi-eye-off'
+                    "
+                    @click:append-inner="
+                      isPasswordConfirmVisible = !isPasswordConfirmVisible
+                    "
+                    :rules="[requiredValidator, confirmedValidator(
+                        passwordForm.password,
+                        passwordForm.password_confirmation,
+                      ),]"
+                  ></v-text-field>
+                </v-form>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn text color="red" @click="changePasswordDialog = false">Cancel</v-btn>
+                <v-btn
+                  text color="green"
+                  :disabled="!isPasswordFormValid"
+                  @click="handleChangePassword"
+                >
+                  Submit
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-list>
       </v-navigation-drawer>
 
@@ -66,15 +152,25 @@
           <v-row justify="center" align="center" class="hero-section">
             <v-col cols="12" class="text-center">
               <h1 class="hero-title">Welcome to the Library Dashboard</h1>
-              <p class="hero-subtitle">Monitor and manage your library operations seamlessly.</p>
+              <p class="hero-subtitle">
+                Monitor and manage your library operations seamlessly.
+              </p>
             </v-col>
           </v-row>
 
           <!-- Statistics Section -->
           <v-row justify="center" class="stats-section">
-            <v-col cols="12" sm="6" md="4" v-for="(value, key) in stats" :key="key">
+            <v-col
+              cols="12"
+              sm="6"
+              md="4"
+              v-for="(value, key) in stats"
+              :key="key"
+            >
               <v-card class="stats-card" elevation="24">
-                <v-icon :color="cardColor(key)" class="icon" large>{{ getIcon(key) }}</v-icon>
+                <v-icon :color="cardColor(key)" class="icon" large>{{
+                  getIcon(key)
+                }}</v-icon>
                 <h3 class="card-title">{{ getTitle(key) }}</h3>
                 <p class="card-value">{{ value }}</p>
               </v-card>
@@ -84,10 +180,9 @@
       </v-main>
     </v-row>
 
-    <!-- Footer -->
-    <v-footer class="footer">
-      <v-row justify="center" class="footer-content">
-        <span>2024 - Book Shelf | All Rights Reserved</span>
+    <v-footer class="font-weight-bold bg" elevation="4" app>
+      <v-row justify="start">
+        <v-col class="text-right py-2 white-text"> 2024 - Book Shelf </v-col>
       </v-row>
     </v-footer>
 
@@ -97,82 +192,98 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useDisplay } from 'vuetify';
-import LogoutModal from '../auth/LogoutModal.vue';
-import { supabase } from '@/utils/supabase';
-import { getInitials } from '@/utils/helpers';
+import { ref, onMounted } from 'vue'
+import { useDisplay } from 'vuetify'
+import LogoutModal from '../auth/LogoutModal.vue'
+import { supabase } from '@/utils/supabase'
+import { getInitials } from '@/utils/helpers'
+import { useChangePassword } from '@/utils/changer'
+import { confirmedValidator, passwordValidator } from '@/utils/validators'
 
-const { mobile } = useDisplay();
-const drawer = ref(!mobile.value);
+const isPasswordVisible = ref(false)
+const isPasswordConfirmVisible = ref(false)
+const refVForm = ref()
+const { mobile } = useDisplay()
+const drawer = ref(!mobile.value)
 
+const {
+  changePasswordDialog,
+  isPasswordFormValid,
+  passwordForm,
+  rules,
+  openChangePasswordModal,
+  handleChangePassword,
+} = useChangePassword()
 // User Information
-const firstName = ref('');
-const lastName = ref('');
+const firstName = ref('')
+const lastName = ref('')
 
 // Modal Handling
-const logoutModalRef = ref(null);
-const openLogoutModal = () => logoutModalRef.value?.open();
+const logoutModalRef = ref(null)
+const openLogoutModal = () => logoutModalRef.value?.open()
 
 // Fetch User Data
 async function getUserInformation() {
-  const { data } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getUser()
   if (data?.user) {
-    firstName.value = data.user.user_metadata.firstname || 'Guest';
-    lastName.value = data.user.user_metadata.lastname || 'User';
+    firstName.value = data.user.user_metadata.firstname || 'Guest'
+    lastName.value = data.user.user_metadata.lastname || 'User'
   }
 }
 
 // Statistics
-const stats = ref({});
+const stats = ref({})
 const fetchStatistics = async () => {
-  const totalBooks = await fetchTotalBooks();
-  const { booksBorrowed, booksReturned } = await fetchTransactionStats();
+  const totalBooks = await fetchTotalBooks()
+  const { booksBorrowed, booksReturned } = await fetchTransactionStats()
   stats.value = {
     totalBooks: totalBooks + booksReturned - booksBorrowed,
     booksBorrowed,
     booksReturned,
-  };
-};
+  }
+}
 
 const fetchTotalBooks = async () => {
-  const { data } = await supabase.from('books').select('*');
-  return data?.length || 0;
-};
+  const { data } = await supabase.from('books').select('*')
+  return data?.length || 0
+}
 
 const fetchTransactionStats = async () => {
-  const { data } = await supabase.from('transactions').select('status');
-  const booksBorrowed = data.filter((t) => t.status === 'confirmed').length;
-  const booksReturned = data.filter((t) => t.status === 'returned').length;
-  return { booksBorrowed, booksReturned };
-};
+  const { data } = await supabase.from('transactions').select('status')
+  const booksBorrowed = data.filter(t => t.status === 'confirmed').length
+  const booksReturned = data.filter(t => t.status === 'returned').length
+  return { booksBorrowed, booksReturned }
+}
 
 onMounted(() => {
-  getUserInformation();
-  fetchStatistics();
-});
+  getUserInformation()
+  fetchStatistics()
+})
 
-const navigateTo = (path) => {
-  $router.push(path);
-};
+const navigateTo = path => {
+  $router.push(path)
+}
 
-const getIcon = (key) => ({
-  totalBooks: 'mdi-book',
-  booksBorrowed: 'mdi-book-check',
-  booksReturned: 'mdi-bookmark-check',
-}[key]);
+const getIcon = key =>
+  ({
+    totalBooks: 'mdi-book',
+    booksBorrowed: 'mdi-book-check',
+    booksReturned: 'mdi-bookmark-check',
+  })[key]
 
-const getTitle = (key) => ({
-  totalBooks: 'Total Books',
-  booksBorrowed: 'Books Borrowed',
-  booksReturned: 'Books Returned',
-}[key]);
+const getTitle = key =>
+  ({
+    totalBooks: 'Total Books',
+    booksBorrowed: 'Books Borrowed',
+    booksReturned: 'Books Returned',
+  })[key]
 
-const cardColor = (key) => ({
-  totalBooks: 'primary',
-  booksBorrowed: 'success',
-  booksReturned: 'blue',
-}[key]);
+const cardColor = key =>
+  ({
+    totalBooks: 'primary',
+    booksBorrowed: 'success',
+    booksReturned: 'blue',
+  })[key]
 </script>
 
 <style scoped>
@@ -180,6 +291,9 @@ const cardColor = (key) => ({
 .app-bar {
   background: #2e3b55;
   color: white;
+}
+.bg {
+  background-color: #232d3f;
 }
 
 /* Sidebar */
@@ -196,6 +310,9 @@ const cardColor = (key) => ({
   position: relative;
   min-height: 100vh;
   padding: 20px;
+}
+.white-text {
+  color: white;
 }
 
 /* Background Blur */
@@ -215,12 +332,11 @@ const cardColor = (key) => ({
 
 /* Hero Section and Stats Section */
 /* Foreground Content */
-.hero-section, 
+.hero-section,
 .stats-section {
   position: relative;
   z-index: 1; /* Ensure content appears above the blurred background */
 }
-
 
 /* Hero Section */
 .hero-section {
@@ -248,6 +364,13 @@ const cardColor = (key) => ({
   flex-wrap: wrap;
   justify-content: center;
   gap: 20px; /* Add spacing between cards */
+}
+
+.nav-title {
+  font-family: 'Merriweather', serif;
+  font-size: 1.4rem;
+  font-weight: 1000;
+  margin: 0;
 }
 
 /* Statistics Cards */
@@ -304,7 +427,7 @@ const cardColor = (key) => ({
   }
 }
 
-.icon{
+.icon {
   font-size: 300%;
 }
 /* Footer */
