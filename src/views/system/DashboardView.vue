@@ -17,9 +17,8 @@
       <v-navigation-drawer
         v-model="drawer"
         :temporary="mobile"
-        location="left"
         :permanent="!mobile"
-        style="background-color: #E7F0DC"
+        class="sidebar"
       >
       <template v-slot:prepend>
           <v-divider></v-divider>

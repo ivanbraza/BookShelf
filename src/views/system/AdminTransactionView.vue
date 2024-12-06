@@ -150,7 +150,7 @@ onMounted(fetchTransactions)
       </v-btn>
       <v-spacer></v-spacer>
       <v-img
-        src="/images/bookshelf-logo.jpg"
+        src="/images/logo.png"
         class="mx-3 my-4"
         max-width="50px"
       ></v-img>
@@ -310,74 +310,76 @@ onMounted(fetchTransactions)
 
           <!-- Transactions Table -->
           <v-data-table
-            :items="transactions"
-            :headers="headers"
-            dense
-            :loading="loading"
-            class="responsive-table"
-            hide-default-header
-          >
-            <template v-slot:body="{ items }">
-              <template v-for="item in items" :key="item.id">
-                <!-- Card View on Mobile -->
-                <div class="table-card" v-if="mobile">
-                  <div class="table-card-field">
-                    <span class="field-label">Book Title:</span>
-                    <span class="field-value">{{ item.book_title }}</span>
-                  </div>
-                  <div class="table-card-field">
-                    <span class="field-label">Borrow Date:</span>
-                    <span class="field-value">{{ item.borrowed_date }}</span>
-                  </div>
-                  <div class="table-card-field">
-                    <span class="field-label">Return Date:</span>
-                    <span class="field-value">{{ item.return_date }}</span>
-                  </div>
-                  <div class="table-card-field">
-                    <span class="field-label">Status:</span>
-                    <v-chip
-                      :color="item.status === 'confirmed' ? 'green' : 'orange'"
-                      text-color="white"
-                      small
-                    >
-                      {{ item.status }}
-                    </v-chip>
-                  </div>
-                  <div class="table-card-field">
-                    <v-btn
-                      @click="
-                        markAsReturned(item)
-                       "
-                      color="green"
-                      small
-                      >Returned</v-btn
-                    >
-                  </div>
-                </div>
+  :items="transactions"
+  :headers="headers"
+  dense
+  :loading="loading"
+  class="responsive-table"
+  hide-default-header
+>
+  <!-- Display headers only on non-mobile (desktop) screens -->
+  <template v-if="!mobile" v-slot:header>
+    <thead>
+      <tr>
+        <th v-for="header in headers" :key="header.value">{{ header.title }}</th>
+      </tr>
+    </thead>
+  </template>
 
-                <!-- Default Table Row View for Larger Screens -->
-                <tr v-else>
-                  <td>{{ item.book_title }}</td>
-                  <td>{{ item.borrowed_date }}</td>
-                  <td>{{ item.return_date }}</td>
-                  <td>
-                    <v-chip
-                      :color="item.status === 'confirmed' ? 'green' : 'orange'"
-                      text-color="white"
-                      small
-                    >
-                      {{ item.status }}
-                    </v-chip>
-                  </td>
-                  <td>
-                    <v-btn @click="markAsReturned(item)" color="green" small
-                      >Returned</v-btn
-                    >
-                  </td>
-                </tr>
-              </template>
-            </template>
-          </v-data-table>
+  <template v-slot:body="{ items }">
+    <template v-for="item in items" :key="item.id">
+      <!-- Card View on Mobile -->
+      <div class="table-card" v-if="mobile">
+        <div class="table-card-field">
+          <span class="field-label">Book Title:</span>
+          <span class="field-value">{{ item.book_title }}</span>
+        </div>
+        <div class="table-card-field">
+          <span class="field-label">Borrow Date:</span>
+          <span class="field-value">{{ item.borrowed_date }}</span>
+        </div>
+        <div class="table-card-field">
+          <span class="field-label">Return Date:</span>
+          <span class="field-value">{{ item.return_date }}</span>
+        </div>
+        <div class="table-card-field">
+          <span class="field-label">Status:</span>
+          <v-chip
+            :color="item.status === 'confirmed' ? 'green' : 'orange'"
+            text-color="white"
+            small
+          >
+            {{ item.status }}
+          </v-chip>
+        </div>
+        <div class="table-card-field">
+          <v-btn @click="markAsReturned(item)" color="green" small>Returned</v-btn>
+        </div>
+      </div>
+
+      <!-- Default Table Row View for Larger Screens -->
+      <tr v-else>
+        <td>{{ item.user_info }}</td>
+        <td>{{ item.book_title }}</td>
+        <td>{{ item.borrowed_date }}</td>
+        <td>{{ item.return_date }}</td>
+        <td>
+          <v-chip
+            :color="item.status === 'confirmed' ? 'green' : 'orange'"
+            text-color="white"
+            small
+          >
+            {{ item.status }}
+          </v-chip>
+        </td>
+        <td>
+          <v-btn @click="markAsReturned(item)" color="green" small>Returned</v-btn>
+        </td>
+      </tr>
+    </template>
+  </template>
+</v-data-table>
+
           <!-- Message if no transactions -->
           <v-alert
             v-if="!loading && transactions.length === 0"
