@@ -67,13 +67,13 @@ const transactions = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const headers = ref([
+  { title: 'Borrower Name', value: 'user_info' },
   { title: 'Book Title', value: 'book_title' },
-  { title: 'User Info', value: 'user_info' },
   { title: 'Email', value: 'email' },
-  { title: 'Borrow Date', value: 'borrowed_date' },
-  { title: 'Return Date', value: 'return_date' },
-  { title: 'Status', value: 'status' },
-  { title: 'Actions', value: 'actions' },
+  { title: 'Borrow Date', value: 'borrowed_date', width: '40px' },
+  { title: 'Return Date', value: 'return_date', width: '4 0px' },
+  { title: 'Status', value: 'status'},
+  { title: 'Actions', value: 'actions'},
 ]);
 
 const fetchTransactions = async () => {
@@ -308,7 +308,7 @@ onMounted(fetchTransactions);
       </v-navigation-drawer>
 
       <v-container class="content-area px-auto py-auto mt-16">
-        <v-container elevation="4">
+        <v-container class="border-md" elevation="4">
           <v-card-title class="font-weight-bold text-center text-secondary" style="font-size: 32px;">
             Borrow Request
           </v-card-title>
@@ -325,7 +325,7 @@ onMounted(fetchTransactions);
     dense
     :loading="loading"
     class="responsive-table"
-    hide-default-header
+    :hide-default-header="mobile"
   >
     <template v-slot:body="{ items }">
       <template v-for="item in items" :key="item.id">
@@ -338,6 +338,10 @@ onMounted(fetchTransactions);
           <div class="table-card-field">
             <span class="field-label">Book Title:</span>
             <span class="field-value">{{ item.book_title }}</span>
+          </div>
+          <div class="table-card-field">
+            <span class="field-label">Email:</span>
+            <span class="field-value">{{ item.email }}</span>
           </div>
           <div class="table-card-field">
             <span class="field-label">Borrow Date:</span>
@@ -365,6 +369,7 @@ onMounted(fetchTransactions);
         <tr v-else>
           <td>{{ item.user_info}}</td>
           <td>{{ item.book_title }}</td>
+          <td>{{ item.email}}</td>
           <td>{{ item.borrowed_date }}</td>
           <td>{{ item.return_date }}</td>
           <td>
@@ -373,8 +378,8 @@ onMounted(fetchTransactions);
             </v-chip>
           </td>
           <td>
-            <v-btn @click="handleAccept(item)" color="green" small class="py-3 px-5 mx-4">Accept</v-btn>
-            <v-btn @click="handleDeny(item)" color="red" class="py-3 px-5">Deny</v-btn>
+            <v-btn @click="handleAccept(item)" color="green" small class="mx-1 px-4 flex-grow-1">Accept</v-btn>
+            <v-btn @click="handleDeny(item)" color="red" small class="mx-1 px-7 flex-grow-1">Deny</v-btn>
           </td>
         </tr>
       </template>
@@ -424,11 +429,11 @@ onMounted(fetchTransactions);
 }
 
 .bg {
-  background-color: #232D3F;
+  background-color: #232d3f;
 }
 
 .content-area {
-  margin-left: 22%;
+  margin-left: 19%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -441,22 +446,32 @@ onMounted(fetchTransactions);
   font-size: 16px;
 }
 
+/* Added styles for table outlines and hover effects */
+.v-data-table {
+  border: 1px solid #ccc; /* Outer border for the table */
+  border-radius: 8px;
+}
+
 .v-data-table td,
 .v-data-table th {
   padding: 15px 16px;
-  border-bottom: 1px solid #ddd;
+  border: 1px solid #ddd; /* Inner borders for cells */
+  text-align: center;
 }
 
-.v-data-table .row-hover:hover {
-  background-color: wheat;
+.v-data-table th {
+  background-color: #f4f4f4; /* Light background for headers */
+  font-weight: bold;
+  color: #232624; /* Header text color */
 }
 
-.v-data-table td {
-  text-align: left;
+.v-data-table tbody tr:hover {
+  background-color: cornflowerblue; /* Highlight row on hover */
 }
 
 .v-data-table .v-data-table__wrapper {
-  border-radius: 10px;
+  border-radius: 8px;
+  overflow: hidden; /* Ensures table fits nicely in the card */
 }
 
 .v-card {
@@ -481,75 +496,30 @@ onMounted(fetchTransactions);
 
 /* Make tables responsive on mobile */
 @media screen and (max-width: 600px) {
-  table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-
-  thead {
-    display: table-header-group;
-  }
-
-  tbody {
-    display: table-row-group;
-  }
-
-  th, td {
-    padding: 0.5em;
-    text-align: left;
-    white-space: nowrap;
-  }
-}
-/* Adjust for better mobile alignment */
-/* Make sure cards take full width and align properly on mobile */
-@media screen and (max-width: 600px) {
   .content-area {
     margin-left: 0; /* Remove left margin on mobile */
-    padding: 0 10px; /* Add some padding to the sides of the container */
-    display: flex;
-    justify-content: center; /* Center content */
-    align-items: flex-start; /* Align items to the start */
   }
 
-  .table-card {
-    width: 100%; /* Ensure the card takes up full width */
+  .v-data-table .v-data-table__wrapper {
     display: block;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    box-sizing: border-box; /* Include padding and border in the width */
+    width: 100%; /* Ensure the table takes full width */
   }
 
-  .table-card-field {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 5px;
-    align-items: center;
+  .v-data-table td,
+  .v-data-table th {
+    padding: 12px 10px; /* Adjust padding for smaller screens */
   }
 
-  .field-label {
-    font-weight: bold;
-    color: #555;
-    flex: 1 0 40%; /* Make the label occupy less space */
+  .v-card-title {
+    font-size: 24px; /* Reduce font size for mobile */
   }
 
-  .field-value {
-    text-align: right;
-    color: #333;
-    flex: 1 0 60%; /* Make the value occupy more space */
+  .nav-title {
+    font-size: 1.2rem; /* Make nav items more compact */
   }
 
-  /* Hide Default Table on Mobile */
-  .v-data-table table {
-    display: none;
-  }
-
-  /* Allow horizontal scrolling if necessary */
   .v-data-table__wrapper {
-    overflow-x: auto; /* Allow horizontal scrolling if table content overflows */
+    overflow-x: auto; /* Allow horizontal scrolling */
   }
 
   /* Adjust table layout on mobile */
@@ -557,6 +527,71 @@ onMounted(fetchTransactions);
   .v-data-table th {
     white-space: nowrap; /* Ensure content fits inside */
   }
+
+  /* Make sure the actions column is stacked vertically on mobile */
+  .v-data-table .v-data-table__column--actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Adjust text alignment for better visibility */
+  .v-data-table .v-data-table__column--status {
+    text-align: center;
+  }
 }
 
+
+/* Vertical text for date column */
+.vertical-text {
+  display: inline-block;
+  transform: rotate(-90deg);
+  transform-origin: bottom left;
+  white-space: nowrap;
+  padding-left: 10px;
+}
+
+.table-card {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.table-card-field {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.field-label {
+  font-weight: bold;
+  color: #555;
+}
+
+.field-value {
+  text-align: right;
+  color: #333;
+}
+
+/* Hide Default Table on Mobile */
+@media screen and (max-width: 600px) {
+  .v-data-table table {
+    display: none;
+  }
+
+  .table-card {
+    display: block;
+  }
+}
+
+.v-card-title {
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  color: #232624;
+  font-size: 28px;
+}
 </style>

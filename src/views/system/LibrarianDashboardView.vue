@@ -22,6 +22,7 @@
         :temporary="mobile"
         :permanent="!mobile"
         class="sidebar"
+        style="background-color: #E7F0DC"
       >
         <template v-slot:prepend>
           <v-divider></v-divider>
