@@ -158,7 +158,7 @@ onMounted(fetchTransactions)
       </v-btn>
       <v-spacer></v-spacer>
       <v-img
-        src="/images/bookshelf-logo.jpg"
+        src="/images/logo.png"
         class="mx-3 my-4"
         max-width="50px"
       ></v-img>
@@ -375,7 +375,8 @@ onMounted(fetchTransactions)
 
 <style scoped>
 .app-bar {
-  z-index: 1000;
+  background: #2e3b55;
+  color: white;
 }
 
 .v-footer {

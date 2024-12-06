@@ -17,9 +17,8 @@
       <v-navigation-drawer
         v-model="drawer"
         :temporary="mobile"
-        location="left"
         :permanent="!mobile"
-        style="background-color: #E7F0DC"
+        class="sidebar"
       >
       <template v-slot:prepend>
           <v-divider></v-divider>
@@ -581,7 +580,8 @@ onMounted(async () => {
 }
 
 .app-bar {
-  z-index: 1000;
+  background: #2e3b55;
+  color: white;
 }
 
 .v-footer {

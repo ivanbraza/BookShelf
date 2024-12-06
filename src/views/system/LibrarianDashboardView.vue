@@ -67,7 +67,7 @@
             title="Transaction"
             @click="
               drawer = mobile ? false : drawer;
-              $router.push('/admin_transaction')
+              $router.push('/admin_transactions')
             "
           ></v-list-item>
           <v-list-item
