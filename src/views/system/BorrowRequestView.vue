@@ -4,29 +4,39 @@ import { useDisplay } from 'vuetify';
 import { supabase } from '@/utils/supabase';
 import { getInitials } from '@/utils/helpers';
 import LogoutModal from '../auth/LogoutModal.vue';
+import { useChangePassword } from '@/utils/changer'
+import { confirmedValidator, passwordValidator } from '@/utils/validators'
+import emailjs from '@emailjs/browser';
+
+const isPasswordVisible = ref(false)
+const isPasswordConfirmVisible = ref(false)
+const refVForm = ref()
 
 // Mobile detection from Vuetify's display composable
-const { mobile } = useDisplay();
-const drawer = ref(!mobile.value);
+const { mobile } = useDisplay()
+const drawer = ref(!mobile.value)
+const {
+  changePasswordDialog,
+  isPasswordFormValid,
+  passwordForm,
+  rules,
+  openChangePasswordModal,
+  handleChangePassword,
+} = useChangePassword()
 
-// Logout modal reference
+
 const logoutModalRef = ref(null);
-const openLogoutModal = () => {
-  logoutModalRef.value?.open();
-};
+const openLogoutModal = () => logoutModalRef.value?.open();
 
-// Watch for changes in mobile status
 watch(mobile, (isMobile) => {
   if (!isMobile) {
     drawer.value = true;
   }
 });
 
-// Reactive variables
 const firstName = ref('');
 const lastName = ref('');
 
-// Fetch user information
 async function getUserInformation() {
   const { data, error } = await supabase.auth.getUser();
   if (error) {
@@ -39,12 +49,10 @@ async function getUserInformation() {
       firstname: user.user_metadata.firstname || 'Guest',
       lastname: user.user_metadata.lastname || 'User',
     };
-  } else {
-    return null;
   }
+  return null;
 }
 
-// Lifecycle hook
 onMounted(async () => {
   const user = await getUserInformation();
   if (user) {
@@ -55,8 +63,6 @@ onMounted(async () => {
   }
 });
 
-
-// State for transactions
 const transactions = ref([]);
 const loading = ref(true);
 const error = ref(null);
@@ -67,9 +73,9 @@ const headers = ref([
   { title: 'Borrow Date', value: 'borrowed_date' },
   { title: 'Return Date', value: 'return_date' },
   { title: 'Status', value: 'status' },
-  { title: 'Actions', value: 'actions' }, // New column for Accept/Deny actions
+  { title: 'Actions', value: 'actions' },
 ]);
-// Fetch transactions
+
 const fetchTransactions = async () => {
   loading.value = true;
   error.value = null;
@@ -77,8 +83,8 @@ const fetchTransactions = async () => {
   try {
     const { data, error: fetchError } = await supabase
       .from('transactions')
-      .select('id, book_title, user_info, email, borrowed_date, return_date, status')  // Ensure 'id' is included
-      .eq('status', 'Pending');  // Ensure you're fetching pending transactions
+      .select('id, book_title, user_info, email, borrowed_date, return_date, status')
+      .eq('status', 'Pending');
 
     if (fetchError) {
       console.error('Supabase query error:', fetchError.message);
@@ -86,11 +92,7 @@ const fetchTransactions = async () => {
       return;
     }
 
-    if (data && data.length > 0) {
-      transactions.value = data;  // Set the reactive transactions array
-    } else {
-      transactions.value = [];  // If no data, ensure it is an empty array
-    }
+    transactions.value = data || [];
   } catch (err) {
     console.error('Unexpected error during transaction fetch:', err);
     error.value = 'An unexpected error occurred. Please refresh the page.';
@@ -98,59 +100,78 @@ const fetchTransactions = async () => {
     loading.value = false;
   }
 };
+
+
+const sendEmailNotification = (user_name ,email, bookTitle, actions, return_date, borrowed_date) => {
+  console.log('Sending email to:', email); // Log to verify the correct email
+  const templateParams = {
+    to_name: user_name,
+    to_email: email,
+    book_title: bookTitle,
+    action_status: actions,
+    return_date: return_date,
+    borrow_date: borrowed_date,
+  };
+
+  emailjs
+    .send(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID, // Access from .env
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID, // Access from .env
+      templateParams,
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY // Access from .env
+    )
+    .then(
+      (response) => {
+        console.log('Email sent successfully:', response.status, response.text);
+        alert(`Email notification for "${actions}" was sent successfully.`);
+      },
+      (error) => {
+        console.error('Failed to send email:', error);
+        alert('Error sending email notification. Please try again later.');
+      }
+    );
+};
+
 const handleAccept = async (item) => {
   try {
-    // First, perform the update operation
     const { error: updateError } = await supabase
       .from('transactions')
       .update({ status: 'confirmed' })
-      .eq('id', item.id);  // Make sure the ID is correct
+      .eq('id', item.id);
 
     if (updateError) {
       console.error('Error accepting transaction:', updateError.message);
       return;
     }
 
-    // Fetch the updated transaction manually
-    const { data, error: fetchError } = await supabase
-      .from('transactions')
-      .select('book_title, user_info, email, borrowed_date, return_date, status')
-      .eq('id', item.id)
-      .single(); // Fetch a single row by ID
-
-    if (fetchError) {
-      console.error('Error fetching updated transaction:', fetchError.message);
-    } else {
-      alert('Request Accepted:', data);
-      // Optionally, update the local transactions array or state with the new data
-      fetchTransactions(); // Refresh the transactions list
-    }
+    sendEmailNotification(item.user_info, item.email, item.book_title, 'accepted', item.return_date, item.borrowed_date);
+    fetchTransactions();
+    alert('Request accepted and email notification sent.');
   } catch (err) {
     console.error('Unexpected error accepting transaction:', err);
   }
 };
 
-
-
 const handleDeny = async (item) => {
   try {
-    const { data, error: updateError } = await supabase
+    const { error: updateError } = await supabase
       .from('transactions')
       .update({ status: 'denied' })
       .eq('id', item.id);
 
     if (updateError) {
       console.error('Error denying transaction:', updateError.message);
-    } else {
-      alert('Transaction denied:', data);
-      fetchTransactions(); // Refresh the transactions after the update
+      return;
     }
+
+    sendEmailNotification(item.user_info, item.email, item.book_title, 'denied', item.return_date, item.borrowed_date);
+    fetchTransactions();
+    alert('Request denied and email notification sent.');
   } catch (err) {
     console.error('Unexpected error denying transaction:', err);
   }
 };
 
-// Fetch transactions on component mount
 onMounted(fetchTransactions);
 </script>
 
@@ -218,7 +239,71 @@ onMounted(fetchTransactions);
             prepend-icon="mdi-logout"
             title="Logout"
             @click="openLogoutModal"
+          ></v-list-item><v-list-item
+            class="mt-6 nav-title black-text"
+            prepend-icon="mdi-lock-reset"
+            title="Change Password"
+            @click="openChangePasswordModal"
           ></v-list-item>
+
+          <!-- Change Password Modal -->
+          <v-dialog v-model="changePasswordDialog" max-width="400">
+            <v-card>
+              <v-card-title class="text-h6">Change Password</v-card-title>
+              <v-card-text>
+                <v-form ref="changePasswordForm" v-model="isPasswordFormValid">
+                  <v-text-field
+                    v-model="passwordForm.currentPassword"
+                    label="Current Password"
+                    :type="isPasswordVisible ? 'text' : 'password'"
+                    :append-inner-icon="
+                      isPasswordVisible ? 'mdi-eye' : 'mdi-eye-off'
+                    "
+                    @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                    :rules="[passwordValidator]"
+                  ></v-text-field>
+
+                  <v-text-field
+                    v-model="passwordForm.newPassword"
+                    label="New Password"
+                    :type="isPasswordVisible ? 'text' : 'password'"
+                    :append-inner-icon="
+                      isPasswordVisible ? 'mdi-eye' : 'mdi-eye-off'
+                    "
+                    @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                    :rules="[requiredValidator, passwordValidator]"
+                  ></v-text-field>
+
+                  <v-text-field
+                    v-model="passwordForm.confirmPassword"
+                    label="Confirm New Password"
+                    :type="isPasswordConfirmVisible ? 'text' : 'password'"
+                    :append-inner-icon="
+                      isPasswordConfirmVisible ? 'mdi-eye' : 'mdi-eye-off'
+                    "
+                    @click:append-inner="
+                      isPasswordConfirmVisible = !isPasswordConfirmVisible
+                    "
+                    :rules="[requiredValidator, confirmedValidator(
+                        passwordForm.password,
+                        passwordForm.password_confirmation,
+                      ),]"
+                  ></v-text-field>
+                </v-form>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn text color="red" @click="changePasswordDialog = false">Cancel</v-btn>
+                <v-btn
+                  text color="green"
+                  :disabled="!isPasswordFormValid"
+                  @click="handleChangePassword"
+                >
+                  Submit
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-list>
       </v-navigation-drawer>
 
