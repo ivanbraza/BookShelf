@@ -73,11 +73,13 @@ const transactions = ref([])
 const loading = ref(true)
 const error = ref(null)
 const headers = ref([
+  { title: 'User Info', value: 'user_info' },
   { title: 'Book Title', value: 'book_title' },
   { title: 'Borrow Date', value: 'borrowed_date' },
   { title: 'Return Date', value: 'return_date' },
   { title: 'Status', value: 'status' },
   { title: 'Actions', value: 'actions' }, // New actions column
+  { title: 'Penalty', value: 'penalties'}
 ])
 
 // Fetch transactions
@@ -289,7 +291,7 @@ onMounted(fetchTransactions)
       </v-navigation-drawer>
 
       <v-container class="content-area px-auto py-auto mt-16">
-        <v-container elevation="4">
+        <v-container class="border-md" elevation="4">
           <v-card-title
             class="font-weight-bold text-center text-secondary"
             style="font-size: 32px"
@@ -315,7 +317,7 @@ onMounted(fetchTransactions)
   dense
   :loading="loading"
   class="responsive-table"
-  hide-default-header
+  :hide-default-header="mobile"
 >
   <!-- Display headers only on non-mobile (desktop) screens -->
   <template v-if="!mobile" v-slot:header>
@@ -375,6 +377,7 @@ onMounted(fetchTransactions)
         <td>
           <v-btn @click="markAsReturned(item)" color="green" small>Returned</v-btn>
         </td>
+        <td>{{ item.penalties }}</td>
       </tr>
     </template>
   </template>
@@ -451,22 +454,32 @@ onMounted(fetchTransactions)
   font-size: 16px;
 }
 
+/* Added styles for table outlines and hover effects */
+.v-data-table {
+  border: 1px solid #ccc; /* Outer border for the table */
+  border-radius: 8px;
+}
+
 .v-data-table td,
 .v-data-table th {
   padding: 15px 16px;
-  border-bottom: 1px solid #ddd;
+  border: 1px solid #ddd; /* Inner borders for cells */
+  text-align: center;
 }
 
-.v-data-table .row-hover:hover {
-  background-color: wheat;
+.v-data-table th {
+  background-color: #f4f4f4; /* Light background for headers */
+  font-weight: bold;
+  color: #232624; /* Header text color */
 }
 
-.v-data-table td {
-  text-align: left;
+.v-data-table tbody tr:hover {
+  background-color: cornflowerblue; /* Highlight row on hover */
 }
 
 .v-data-table .v-data-table__wrapper {
-  border-radius: 10px;
+  border-radius: 8px;
+  overflow: hidden; /* Ensures table fits nicely in the card */
 }
 
 .v-card {
@@ -536,6 +549,7 @@ onMounted(fetchTransactions)
   }
 }
 
+
 /* Vertical text for date column */
 .vertical-text {
   display: inline-block;
@@ -580,5 +594,12 @@ onMounted(fetchTransactions)
   .table-card {
     display: block;
   }
+}
+
+.v-card-title {
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  color: #232624;
+  font-size: 28px;
 }
 </style>
