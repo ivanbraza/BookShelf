@@ -183,7 +183,9 @@
 
     <v-footer class="font-weight-bold bg" elevation="4" app>
       <v-row justify="start">
-        <v-col class="text-right py-2 white-text"> 2024 - Book Shelf </v-col>
+        <v-col class="devcol text-right py-2 white-text">
+      2024 - Book Shelf
+    </v-col>
       </v-row>
     </v-footer>
 
@@ -438,4 +440,7 @@ const cardColor = key =>
   text-align: center;
   padding: 10px 0;
 }
+
+
+
 </style>

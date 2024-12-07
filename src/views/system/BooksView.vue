@@ -50,9 +50,6 @@ const returnDatePickerDialog = ref(false)
 const selectedBorrowDate = ref(null)
 const selectedReturnDate = ref(null)
 const currentDate = new Date();
-const convertToUTC8 = date => {
-  return new Date(new Date(date).toISOString());
-};
 
 // Logout modal reference
 const logoutModalRef = ref(null)
@@ -338,6 +335,7 @@ const submitForm = async () => {
           title="Logout"
           @click="openLogoutModal"
         ></v-list-item>
+
         <v-list-item
           class="mt-6 nav-title black-text"
           prepend-icon="mdi-lock-reset"
@@ -576,7 +574,9 @@ const submitForm = async () => {
     </v-dialog>
     <v-footer class="font-weight-bold bg" elevation="4" app>
       <v-row justify="start">
-        <v-col class="text-right py-2 white-text"> 2024 - Book Shelf </v-col>
+        <v-col class="devcol text-right py-2 white-text">
+      2024 - Book Shelf
+    </v-col>
       </v-row>
     </v-footer>
 
@@ -586,6 +586,8 @@ const submitForm = async () => {
 </template>
 
 <style scoped>
+
+
 /* General App Styles */
 .text-center {
   text-align: center;

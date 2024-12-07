@@ -403,7 +403,9 @@ onMounted(fetchTransactions);
     <!-- Footer -->
     <v-footer class="font-weight-bold" elevation="24" app style="background-color: #232D3F;">
       <v-row justify="start">
-        <v-col class="text-right py-2" style="color: white;">2024 - Book Shelf</v-col>
+        <v-col class="devcol text-right py-2 white-text">
+      2024 - Book Shelf
+    </v-col>
       </v-row>
     </v-footer>
 
@@ -413,6 +415,8 @@ onMounted(fetchTransactions);
 </template>
 
 <style scoped>
+
+
 .app-bar {
   background: #2e3b55;
   color: white;
