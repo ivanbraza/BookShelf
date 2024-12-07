@@ -30,7 +30,7 @@ function onClick() {
 
           </v-container>
       </v-main>
-      <v-footer class="font-weight-bold " style="background-color: #232D3F; color: wheat;" border app>2024 - Book Shelf</v-footer>
+      <v-footer class="font-weight-bold  " style="background-color: #232D3F; color: white;" border app>2024 - Book Shelf</v-footer>
     </v-app>
   </v-responsive>
 </template>
