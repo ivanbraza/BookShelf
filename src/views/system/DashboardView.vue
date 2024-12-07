@@ -17,8 +17,9 @@
       <v-navigation-drawer
         v-model="drawer"
         :temporary="mobile"
+        location="left"
         :permanent="!mobile"
-        class="sidebar"
+        style="background-color: #E7F0DC"
       >
       <template v-slot:prepend>
           <v-divider></v-divider>
@@ -57,77 +58,15 @@
             title="Transaction"
             @click="drawer = mobile ? false : drawer; $router.push('/transactions')"
           ></v-list-item>
+    
+          
           <!-- Logout Link -->
           <v-list-item
             class="mt-6 nav-title black-text"
             prepend-icon="mdi-logout"
             title="Logout"
             @click="openLogoutModal"
-          ></v-list-item><v-list-item
-            class="mt-6 nav-title black-text"
-            prepend-icon="mdi-lock-reset"
-            title="Change Password"
-            @click="openChangePasswordModal"
           ></v-list-item>
-
-          <!-- Change Password Modal -->
-          <v-dialog v-model="changePasswordDialog" max-width="400">
-            <v-card>
-              <v-card-title class="text-h6">Change Password</v-card-title>
-              <v-card-text>
-                <v-form ref="changePasswordForm" v-model="isPasswordFormValid">
-                  <v-text-field
-                    v-model="passwordForm.currentPassword"
-                    label="Current Password"
-                    :type="isPasswordVisible ? 'text' : 'password'"
-                    :append-inner-icon="
-                      isPasswordVisible ? 'mdi-eye' : 'mdi-eye-off'
-                    "
-                    @click:append-inner="isPasswordVisible = !isPasswordVisible"
-                    :rules="[passwordValidator]"
-                  ></v-text-field>
-
-                  <v-text-field
-                    v-model="passwordForm.newPassword"
-                    label="New Password"
-                    :type="isPasswordVisible ? 'text' : 'password'"
-                    :append-inner-icon="
-                      isPasswordVisible ? 'mdi-eye' : 'mdi-eye-off'
-                    "
-                    @click:append-inner="isPasswordVisible = !isPasswordVisible"
-                    :rules="[requiredValidator, passwordValidator]"
-                  ></v-text-field>
-
-                  <v-text-field
-                    v-model="passwordForm.confirmPassword"
-                    label="Confirm New Password"
-                    :type="isPasswordConfirmVisible ? 'text' : 'password'"
-                    :append-inner-icon="
-                      isPasswordConfirmVisible ? 'mdi-eye' : 'mdi-eye-off'
-                    "
-                    @click:append-inner="
-                      isPasswordConfirmVisible = !isPasswordConfirmVisible
-                    "
-                    :rules="[requiredValidator, confirmedValidator(
-                        passwordForm.password,
-                        passwordForm.password_confirmation,
-                      ),]"
-                  ></v-text-field>
-                </v-form>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn text color="red" @click="changePasswordDialog = false">Cancel</v-btn>
-                <v-btn
-                  text color="green"
-                  :disabled="!isPasswordFormValid"
-                  @click="handleChangePassword"
-                >
-                  Submit
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
         </v-list>
       </v-navigation-drawer>
 
@@ -474,117 +413,12 @@
 
     <!-- Footer -->
     <v-footer class="font-weight-bold bg" elevation="4" app>
-  <v-row justify="space-between">
-    <v-col class="text-left py-2 white-text">
-      <span class="underline-text" @click="aboutDialog = true">
-        About Developer
-      </span>
-    </v-col>
-    <v-col class="text-right py-2 white-text">
-      2024 - Book Shelf
-    </v-col>
-  </v-row>
-
-  <!-- About Developer Modal -->
-<v-dialog v-model="aboutDialog" max-width="700">
-  <v-card class="light-blue-bg white--text">
-    <v-card-title class="headline text-center">
-      <v-icon class="mr-2" size="36">mdi-account-group</v-icon>
-      <strong>Meet the Developers</strong>
-    </v-card-title>
-    <v-card-text>
-      <v-container>
-        <v-row justify="center" align="center" class="text-center">
-  <!-- System Analyst -->
-  <v-col cols="12" sm="4" class="text-center">
-    <v-img
-      src="./images/mi.jpg"
-      height="100"
-      width="100"
-      class="rounded-circle"
-      style="margin: 0 auto; border: 4px solid white; padding: 5px;">
-    </v-img>
-    <h4 class="mt-3 mb-1">MICHELLE BORROMEO</h4>
-    <p>System Analyst</p>
-    <v-row justify="center" class="social-icons" style="padding-top: 15px;">
-      <v-btn icon href="https://michelleborromeo.github.io" target="_blank">
-        <v-icon>mdi-earth</v-icon>
-      </v-btn>
-      <v-btn icon href="https://github.com/michelleborromeo" target="_blank">
-        <v-icon>mdi-github</v-icon>
-      </v-btn>
-      <v-btn icon href="https://www.linkedin.com/in/michelle-borromeo-a48a582aa/" target="_blank">
-        <v-icon>mdi-linkedin</v-icon>
-      </v-btn>
-    </v-row>
-  </v-col>
-
-  <!-- Frontend Developer -->
-  <v-col cols="12" sm="4" class="text-center">
-    <v-img
-      src="./images/ivan.jpg"
-      height="100"
-      width="100"
-      class="rounded-circle"
-      style="margin: 0 auto; border: 4px solid white; padding: 5px;">
-    </v-img>
-    <h4 class="mt-3 mb-1">IVAN BRAZA</h4>
-    <p>Frontend Developer</p>
-    <v-row justify="center" class="social-icons" style="padding-top: 15px;">
-      <v-btn icon href="https://ivanbraza.github.io/" target="_blank">
-        <v-icon>mdi-earth</v-icon>
-      </v-btn>
-      <v-btn icon href="https://github.com/ivanbraza" target="_blank">
-        <v-icon>mdi-github</v-icon>
-      </v-btn>
-      <v-btn icon href="https://www.linkedin.com/in/ivan-braza-958632328/" target="_blank">
-        <v-icon>mdi-linkedin</v-icon>
-      </v-btn>
-    </v-row>
-  </v-col>
-
-  <!-- Lead Developer -->
-  <v-col cols="12" sm="4" class="text-center">
-    <v-img
-      src="./images/Althea.jpg"
-      height="100"
-      width="100"
-      class="rounded-circle"
-      style="margin: 0 auto; border: 4px solid white; padding: 5px;">
-    </v-img>
-    <h4 class="mt-3 mb-1">ALTHEA BUNA</h4>
-    <p>Lead Developer</p>
-    <v-row justify="center" class="social-icons" style="padding-top: 15px;">
-      <v-btn icon href="https://althealorainebuna.github.io" target="_blank">
-        <v-icon>mdi-earth</v-icon>
-      </v-btn>
-      <v-btn icon href="https://github.com/althealorainebuna" target="_blank">
-        <v-icon>mdi-github</v-icon>
-      </v-btn>
-      <v-btn icon href="https://www.linkedin.com/in/althea-loraine-buna-77a396340/" target="_blank">
-        <v-icon>mdi-linkedin</v-icon>
-      </v-btn>
-    </v-row>
-  </v-col>
-</v-row>
-
-
-
-
-      </v-container>
-    </v-card-text>
-    <v-card-actions>
-      <v-spacer></v-spacer>
-      <v-btn text @click="aboutDialog = false" class="white--text">Close</v-btn>
-    </v-card-actions>
-  </v-card>
-</v-dialog>
-
-
-
-
-</v-footer>
-
+      <v-row justify="start">
+        <v-col class="text-right py-2 white-text">
+          2024 - Book Shelf
+        </v-col>
+      </v-row>
+    </v-footer>
 
     <!-- Logout Modal -->
     <LogoutModal ref="logoutModalRef" />
@@ -597,24 +431,9 @@ import { useDisplay } from 'vuetify';
 import LogoutModal from '../auth/LogoutModal.vue';
 import { supabase } from '@/utils/supabase';
 import { getInitials } from '@/utils/helpers';
-import { useChangePassword } from '@/utils/changer';
-import { confirmedValidator, passwordValidator } from '@/utils/validators';
-
-const isPasswordVisible = ref(false);
-const isPasswordConfirmVisible = ref(false);
-const refVForm = ref();
-
 // Mobile detection from Vuetify's display composable
 const { mobile } = useDisplay();
 const drawer = ref(!mobile.value);
-const {
-  changePasswordDialog,
-  isPasswordFormValid,
-  passwordForm,
-  rules,
-  openChangePasswordModal,
-  handleChangePassword,
-} = useChangePassword();
 
 // Logout modal reference
 const logoutModalRef = ref(null);
@@ -628,6 +447,7 @@ watch(mobile, (isMobile) => {
     drawer.value = true;
   }
 });
+
 
 // Reactive variables
 const firstName = ref('');
@@ -667,16 +487,7 @@ onMounted(async () => {
   }
 });
 
-// About Developer Dialog
-const aboutDialog = ref(false);
 
-const openAboutDialog = () => {
-  aboutDialog.value = true;
-};
-
-const closeAboutDialog = () => {
-  aboutDialog.value = false;
-};
 </script>
 
 <style scoped>
@@ -692,8 +503,7 @@ const closeAboutDialog = () => {
 }
 
 .app-bar {
-  background: #2e3b55;
-  color: white;
+  z-index: 1000;
 }
 
 .v-footer {
@@ -835,49 +645,6 @@ const closeAboutDialog = () => {
 .text-center {
   text-align: center;
 }
-
-
-.underline-text {
-  text-decoration: underline;
-  cursor: pointer;
-  color: white;
-}
-
-.light-blue-bg {
-  background-color: #add8e6 !important; /* Light blue background */
-}
-
-h4 {
-  font-family: 'Roboto', sans-serif;
-}
-
-.social-icons v-btn {
-  margin: 0 6px; /* Add spacing between icons */
-  padding: 10px; /* Add more padding for spacing */
-}
-
-.social-icons v-btn v-icon {
-  font-size: 24px;
-}
-/* Ensure everything centers in the modal */
-.text-center {
-  text-align: center !important;
-}
-
-.v-img {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.v-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-
 
 /* Make sure the overlay text remains readable on mobile */
 @media (max-width: 600px) {

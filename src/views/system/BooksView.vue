@@ -49,6 +49,7 @@ const borrowDatePickerDialog = ref(false)
 const returnDatePickerDialog = ref(false)
 const selectedBorrowDate = ref(null)
 const selectedReturnDate = ref(null)
+const currentDate = new Date();
 
 // Logout modal reference
 const logoutModalRef = ref(null)
@@ -159,6 +160,7 @@ const openForm = book => {
   dialog.value = true
 }
 
+
 const selectedBookTitle = ref('') // To store the selected book's title
 
 const selectedDate = ref(null) // Initialize as null or with a default value
@@ -178,6 +180,11 @@ const submitForm = async () => {
   if (!selectedBorrowDate.value || !selectedReturnDate.value) {
     console.error('Please select a borrow and return date')
     alert('Please select a borrow and return date')
+    return
+  }
+
+  if (new Date(currentDate) > new Date(selectedBorrowDate.value)) {
+    alert('Error: Borrow date must be later than the current date.')
     return
   }
 
