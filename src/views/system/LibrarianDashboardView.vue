@@ -56,7 +56,7 @@
           <v-list-item
             class="mt-6 nav-title black-text"
             prepend-icon="mdi-book-plus"
-            title="Borrow Request"
+            title="Borrow Requests"
             @click="
               drawer = mobile ? false : drawer;
               $router.push('/borrow_request')
@@ -65,7 +65,7 @@
           <v-list-item
             class="mt-6 nav-title black-text"
             prepend-icon="mdi-account-credit-card"
-            title="Transaction"
+            title="Transactions"
             @click="
               drawer = mobile ? false : drawer;
               $router.push('/admin_transactions')

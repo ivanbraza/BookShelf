@@ -24,6 +24,11 @@ const {
   handleChangePassword,
 } = useChangePassword()
 
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'Invalid Date';
+  return date.toLocaleDateString(); 
+};
 
 const logoutModalRef = ref(null);
 const openLogoutModal = () => logoutModalRef.value?.open();
@@ -67,11 +72,11 @@ const transactions = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const headers = ref([
-  { title: 'Borrower Name', value: 'user_info' },
+  { title: 'Borrower Name', value: 'user_info'},
   { title: 'Book Title', value: 'book_title' },
   { title: 'Email', value: 'email' },
-  { title: 'Borrow Date', value: 'borrowed_date', width: '2 px' },
-  { title: 'Return Date', value: 'return_date', width: '2 px' },
+  { title: 'Borrow Date', value: 'borrowed_date' },
+  { title: 'Return Date', value: 'return_date'},
   { title: 'Status', value: 'status'},
   { title: 'Actions', value: 'actions', width: '40px'},
 ]);
@@ -136,7 +141,7 @@ const handleAccept = async (item) => {
   try {
     const { error: updateError } = await supabase
       .from('transactions')
-      .update({ status: 'confirmed' })
+      .update({ status: 'On Going' })
       .eq('id', item.id);
 
     if (updateError) {
@@ -144,7 +149,7 @@ const handleAccept = async (item) => {
       return;
     }
 
-    sendEmailNotification(item.user_info, item.email, item.book_title, 'accepted', item.return_date, item.borrowed_date);
+    sendEmailNotification(item.user_info, item.email, item.book_title, 'Accepted', item.return_date, item.borrowed_date);
     fetchTransactions();
     alert('Request accepted and email notification sent.');
   } catch (err) {
@@ -156,7 +161,7 @@ const handleDeny = async (item) => {
   try {
     const { error: updateError } = await supabase
       .from('transactions')
-      .update({ status: 'denied' })
+      .update({ status: 'Denied' })
       .eq('id', item.id);
 
     if (updateError) {
@@ -164,7 +169,7 @@ const handleDeny = async (item) => {
       return;
     }
 
-    sendEmailNotification(item.user_info, item.email, item.book_title, 'denied', item.return_date, item.borrowed_date);
+    sendEmailNotification(item.user_info, item.email, item.book_title, 'Denied', item.return_date, item.borrowed_date);
     fetchTransactions();
     alert('Request denied and email notification sent.');
   } catch (err) {
@@ -187,7 +192,7 @@ onMounted(fetchTransactions);
     </v-app-bar>
 
     <!-- Main Layout -->
-    <v-row class="main-container">
+    <v-row class="main-container" style="background-color: aliceblue">
       <v-navigation-drawer
         v-model="drawer"
         :temporary="mobile"
@@ -326,6 +331,7 @@ onMounted(fetchTransactions);
     :loading="loading"
     class="responsive-table"
     :hide-default-header="mobile"
+    style="background-color: aliceblue"
   >
     <template v-slot:body="{ items }">
       <template v-for="item in items" :key="item.id">
@@ -359,8 +365,8 @@ onMounted(fetchTransactions);
           </div>
           <div class="table-card-field">
            
-                <v-btn @click="handleAccept(item)" color="green" small>Accept</v-btn>
-                <v-btn @click="handleDeny(item)" color="red" small>Deny</v-btn>
+                <v-btn @click="handleAccept(item)" color="green" small class="px-1">Accept</v-btn>
+                <v-btn @click="handleDeny(item)" color="red" small class="px-3">Deny</v-btn>
             
           </div>
         </div>
@@ -371,15 +377,15 @@ onMounted(fetchTransactions);
           <td>{{ item.book_title }}</td>
           <td>{{ item.email}}</td>
           <td>{{ item.borrowed_date }}</td>
-          <td>{{ item.return_date }}</td>
+          <td>{{ item.borrowed_date }}</td>
           <td>
             <v-chip :color="item.status === 'confirmed' ? 'green' : 'orange'" text-color="white" small>
               {{ item.status }}
             </v-chip>
           </td>
           <td>
-            <v-btn @click="handleAccept(item)" color="green" small class="mx-1 px-4 flex-grow-1">Accept</v-btn>
-            <v-btn @click="handleDeny(item)" color="red" small class="mx-1 px-7 flex-grow-1">Deny</v-btn>
+            <v-btn @click="handleAccept(item)" color="green" small class="px-1 mt-2 mb-3">Accept</v-btn>
+            <v-btn @click="handleDeny(item)" color="red" small class="px-3 mb-3">Deny</v-btn>
           </td>
         </tr>
       </template>

@@ -60,13 +60,13 @@ async function getUserInformation() {
 
 const getChipColor = (status) => {
   switch (status) {
-    case 'confirmed':
+    case 'On Going':
       return 'green'; // confirmed status will be green
-    case 'denied':
+    case 'Denied':
       return 'red';   // denied status will be red
-    case 'returned':
+    case 'Returned':
       return 'blue';  // returned status will be blue
-    case 'pending':
+    case 'Pending':
       return 'yellow'; // pending status will be yellow
     default:
       return 'grey';   // default color in case of unknown status
@@ -93,6 +93,7 @@ const headers = ref([
   { title: 'Borrow Date', value: 'borrowed_date' },
   { title: 'Return Date', value: 'return_date' },
   { title: 'Status', value: 'status' }, // New status column
+  { title: 'Penalty', value: 'penalties'}
 ])
 
 // Fetch transactions
@@ -122,7 +123,7 @@ const fetchTransactions = async () => {
     console.log('Fetching transactions for the user...')
     const { data, error: fetchError } = await supabase
       .from('transactions')
-      .select('book_title, user_info, borrowed_date, return_date, status') // Include the status field
+      .select('book_title, user_info, borrowed_date, return_date, status', 'penalties') // Include the status field
       .eq('email', email)
 
     if (fetchError) {
@@ -132,11 +133,43 @@ const fetchTransactions = async () => {
     }
 
     if (data && data.length > 0) {
-      console.log('Transactions fetched successfully:', data)
-      transactions.value = data
+      transactions.value = data.map((transaction) => {
+        const today = new Date();
+        const returnDate = new Date(transaction.return_date);
+        const overdueDays = Math.max(0, Math.ceil((today - returnDate) / (1000 * 60 * 60 * 24)));
+
+        if (overdueDays > 0 && overdueDays <= 15) {
+          transaction.penalties = overdueDays * 10; // Charge 10 pesos per overdue day
+        } else if (overdueDays > 15) {
+          transaction.penalties = 150; // Maximum penalty of 150 pesos
+          transaction.raw_user_meta_data.user_status = 'Blocked';
+        } else {
+          transaction.penalties = 0; // No penalties if returned on time
+        }
+
+        return transaction;
+      });
+
+      transactions.value.sort((a, b) => {
+  if (a.status === b.status) return 0;
+
+  // Handle sorting logic with priority mapping
+  const priority = { 
+    'On Going': 1,    // Highest priority
+    'Pending': 2,    // Second priority
+    'Returned': 3,   // Third priority
+    'Denied': 4      // Fourth priority
+  };
+
+  const aPriority = priority[a.status] || 5; // Default to 5 if the status is unrecognized
+  const bPriority = priority[b.status] || 5;
+
+  return aPriority - bPriority;
+});
+
+
     } else {
-      console.warn('No transactions found for the user.')
-      transactions.value = []
+      transactions.value = []; // If no data, ensure it is an empty array
     }
   } catch (err) {
     console.error('Unexpected error during transaction fetch:', err.message)
@@ -165,7 +198,7 @@ onMounted(fetchTransactions)
     </v-app-bar>
 
     <!-- Main Layout -->
-    <v-row class="main-container">
+    <v-row class="main-container" style="background-color: aliceblue">
       <v-navigation-drawer
         v-model="drawer"
         :temporary="mobile"
@@ -324,30 +357,60 @@ onMounted(fetchTransactions)
 
           <!-- Transactions Table -->
           <v-data-table
-            :items="transactions"
-            :headers="headers"
-            dense
-            :loading="loading"
-          >
-          <template v-slot:body-cell.status="{ item }">
-           <td>
-           <v-chip
-          :color="getChipColor(status)"
-           text-color="white"
-          small
-          >
-          {{ item.status }}
-          </v-chip>
-         </td>
-          </template>
-          </v-data-table>
+    :items="transactions"
+    :headers="headers"
+    dense
+    :loading="loading"
+    class="responsive-table"
+    :hide-default-header="mobile"
+    style="background-color: aliceblue"
+  >
+    <template v-slot:body="{ items }">
+      <template v-for="item in items" :key="item.id">
+        <!-- Card View on Mobile -->
+        <div class="table-card" v-if="mobile">
+          <div class="table-card-field">
+            <span class="field-label">Book Title:</span>
+            <span class="field-value">{{ item.book_title }}</span>
+          </div>
+          <div class="table-card-field">
+            <span class="field-label">Borrow Date:</span>
+            <span class="field-value">{{ item.borrowed_date }}</span>
+          </div>
+          <div class="table-card-field">
+            <span class="field-label">Return Date:</span>
+            <span class="field-value">{{ item.return_date }}</span>
+          </div>
+          <div class="table-card-field">
+            <span class="field-label">Status:</span>
+            <v-chip :color="item.status === 'confirmed' ? 'green' : 'orange'" text-color="white" small>
+              {{ item.status }}
+            </v-chip>
+          </div>
+          <div class="table-card-field">
+            <span class="field-label">Penalty:</span>
+            <span class="field-value">{{ item.penalties }}</span>
+          </div>
+        </div>
+
+        <!-- Default Table Row View for Larger Screens -->
+        <tr v-else>
+          <td>{{ item.book_title }}</td>
+          <td>{{ item.borrowed_date }}</td>
+          <td>{{ item.borrowed_date }}</td>
+          <td>
+            <v-chip :color="item.status === 'On Going' ? 'green' : item.status === 'Pending' ? 'orange' : item.status === 'Returned' ? 'blue' : item.status === 'Denied' ? 'red' : 'grey'" text-color='white' small>
+              {{ item.status }}
+            </v-chip>
+          </td>
+          <td>{{ item.penalties }}</td>
+        </tr>
+      </template>
+    </template>
+  </v-data-table>
 
           <!-- Message if no transactions -->
-          <v-alert
-            v-if="!loading && transactions.length === 0"
-            type="info"
-            color="blue"
-          >
+          <v-alert v-if="!loading && transactions.length === 0" type="info" color="blue">
             No pending transactions found.
           </v-alert>
         </v-container>
@@ -433,7 +496,7 @@ onMounted(fetchTransactions)
 }
 
 .v-data-table tbody tr:hover {
-  background-color: wheat; /* Highlight row on hover */
+  background-color: cornflowerblue; /* Highlight row on hover */
 }
 
 .v-data-table .v-data-table__wrapper {

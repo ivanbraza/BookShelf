@@ -50,6 +50,9 @@ const returnDatePickerDialog = ref(false)
 const selectedBorrowDate = ref(null)
 const selectedReturnDate = ref(null)
 const currentDate = new Date();
+const convertToUTC8 = date => {
+  return new Date(new Date(date).toISOString());
+};
 
 // Logout modal reference
 const logoutModalRef = ref(null)
@@ -165,10 +168,6 @@ const selectedBookTitle = ref('') // To store the selected book's title
 
 const selectedDate = ref(null) // Initialize as null or with a default value
 
-const formatDate = date => {
-  const options = { year: 'numeric', month: 'long', day: 'numeric' }
-  return new Date(date).toLocaleDateString(undefined, options)
-}
 
 const closeDialog = () => {
   selectedBorrowDate.value = null // Reset the borrow date
@@ -183,12 +182,12 @@ const submitForm = async () => {
     return
   }
 
-  if (new Date(currentDate) > new Date(selectedBorrowDate.value)) {
+  if (new Date(currentDate) <= new Date(selectedBorrowDate.value)){
     alert('Error: Borrow date must be later than the current date.')
     return
   }
 
-  if (new Date(selectedReturnDate.value) < new Date(selectedBorrowDate.value)) {
+  if (new Date(selectedReturnDate.value) <= new Date(selectedBorrowDate.value)) {
     alert('Error: Return date must be later than borrow date.')
     return
   }
@@ -540,7 +539,7 @@ const submitForm = async () => {
             <v-text-field
               v-model="selectedBorrowDate"
               label="Borrow Date"
-              :value="selectedBorrowDate ? formatDate(selectedBorrowDate) : ''"
+              :value="selectedBorrowDate ? selectedBorrowDate : ''"
               :rules="[value => !!value || 'Borrow date is required']"
               append-inner-icon="mdi-calendar"
               @click="borrowDatePickerDialog = true"
@@ -556,7 +555,7 @@ const submitForm = async () => {
             <v-text-field
               v-model="selectedReturnDate"
               label="Return Date"
-              :value="selectedReturnDate ? formatDate(selectedReturnDate) : ''"
+              :value="selectedReturnDate ? selectedReturnDate : ''"
               :rules="[value => !!value || 'Return date is required']"
               append-inner-icon="mdi-calendar"
               @click="returnDatePickerDialog = true"
