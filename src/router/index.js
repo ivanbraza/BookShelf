@@ -80,6 +80,8 @@ router.beforeEach(async (to) => {
     const isLoggedIn = await isAuthenticated();
     const userMetadata = isLoggedIn ? await getUserInformation() : null;
     const userRole = userMetadata?.role;
+    const userStatus = userMetadata?.user_status; // Get the user's status
+
 
     // Prevent logged-in users from accessing login or register pages
     if (isLoggedIn && (to.name === 'login' || to.name === 'register')) {
@@ -91,6 +93,14 @@ router.beforeEach(async (to) => {
       Borrower: ['dashboard', 'books', 'transactions'], // Routes allowed for Borrowers
       Librarian: ['librarian_dashboard', 'admin_transactions', 'borrow_request'], // Routes allowed for Librarians
     };
+
+     // Block access for users with user_status === "Blocked"
+     if (isLoggedIn && userStatus === 'Blocked') {
+      if (to.name === 'books') {
+        alert('Your account has been blocked. You cannot access this page.');
+        return { name: 'dashboard' };
+      }
+    }
 
     // Redirect users based on their role and requested route
     if (isLoggedIn) {

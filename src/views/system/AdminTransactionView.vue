@@ -1,19 +1,20 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
-import { useDisplay } from 'vuetify'
-import { supabase } from '@/utils/supabase'
-import { getInitials } from '@/utils/helpers'
-import LogoutModal from '../auth/LogoutModal.vue'
-import { useChangePassword } from '@/utils/changer'
-import { confirmedValidator, passwordValidator } from '@/utils/validators'
+import { ref, onMounted, watch } from 'vue';
+import { useDisplay } from 'vuetify';
+import { supabase } from '@/utils/supabase';
+import { getInitials } from '@/utils/helpers';
+import LogoutModal from '../auth/LogoutModal.vue';
+import { useChangePassword } from '@/utils/changer';
+import { confirmedValidator, passwordValidator } from '@/utils/validators';
 
-const isPasswordVisible = ref(false)
-const isPasswordConfirmVisible = ref(false)
-const refVForm = ref()
+const isPasswordVisible = ref(false);
+const isPasswordConfirmVisible = ref(false);
+const refVForm = ref();
 
 // Mobile detection from Vuetify's display composable
-const { mobile } = useDisplay()
-const drawer = ref(!mobile.value)
+const { mobile } = useDisplay();
+const drawer = ref(!mobile.value);
+
 const {
   changePasswordDialog,
   isPasswordFormValid,
@@ -21,126 +22,164 @@ const {
   rules,
   openChangePasswordModal,
   handleChangePassword,
-} = useChangePassword()
+} = useChangePassword();
+
 // Logout modal reference
-const logoutModalRef = ref(null)
+const logoutModalRef = ref(null);
 const openLogoutModal = () => {
-  logoutModalRef.value?.open()
-}
+  logoutModalRef.value?.open();
+};
 
 // Watch for changes in mobile status
-watch(mobile, isMobile => {
+watch(mobile, (isMobile) => {
   if (!isMobile) {
-    drawer.value = true
+    drawer.value = true;
   }
-})
+});
 
 // Reactive variables
-const firstName = ref('')
-const lastName = ref('')
+const firstName = ref('');
+const lastName = ref('');
 
 // Fetch user information
 async function getUserInformation() {
-  const { data, error } = await supabase.auth.getUser()
+  const { data, error } = await supabase.auth.getUser();
   if (error) {
-    console.error('Error fetching user information:', error.message)
-    return null
+    console.error('Error fetching user information:', error.message);
+    return null;
   }
   if (data.user) {
-    const { user } = data
+    const { user } = data;
     return {
       firstname: user.user_metadata.firstname || 'Guest',
       lastname: user.user_metadata.lastname || 'User',
-    }
+    };
   } else {
-    return null
+    return null;
   }
 }
 
 // Lifecycle hook
 onMounted(async () => {
-  const user = await getUserInformation()
+  const user = await getUserInformation();
   if (user) {
-    firstName.value = user.firstname
-    lastName.value = user.lastname
+    firstName.value = user.firstname;
+    lastName.value = user.lastname;
   } else {
-    console.error('User not logged in or data not found.')
+    console.error('User not logged in or data not found.');
   }
-})
+});
+
 
 // State for transactions
-const transactions = ref([])
-const loading = ref(true)
-const error = ref(null)
+const transactions = ref([]);
+const loading = ref(true);
+const error = ref(null);
 const headers = ref([
   { title: 'Borrower Name', value: 'user_info' },
   { title: 'Book Title', value: 'book_title' },
   { title: 'Borrow Date', value: 'borrowed_date' },
   { title: 'Return Date', value: 'return_date' },
   { title: 'Status', value: 'status' },
-  { title: 'Actions', value: 'actions' }, // New actions column
-  { title: 'Penalty', value: 'penalties'}
-])
+  { title: 'Actions', value: 'actions' },
+  { title: 'Penalty', value: 'penalties' },
+]);
 
 // Fetch transactions
 const fetchTransactions = async () => {
-  loading.value = true
-  error.value = null
+  loading.value = true;
+  error.value = null;
 
   try {
     const { data, error: fetchError } = await supabase
       .from('transactions')
       .select(
-        'id, book_title, user_info, email, borrowed_date, return_date, status',
-      ) // Ensure 'id' is included
-      .eq('status', 'confirmed') // Ensure you're fetching pending transactions
+        'id, book_title, user_info, email, borrowed_date, return_date, status, penalties'
+      )
+      .in('status', ['On Going', 'Returned']);
 
     if (fetchError) {
-      console.error('Supabase query error:', fetchError.message)
-      error.value = 'Unable to fetch transactions. Please try again later.'
-      return
+      console.error('Supabase query error:', fetchError.message);
+      error.value = 'Unable to fetch transactions. Please try again later.';
+      return;
     }
 
     if (data && data.length > 0) {
-      transactions.value = data // Set the reactive transactions array
+      transactions.value = data.map((transaction) => {
+        const today = new Date();
+        const returnDate = new Date(transaction.return_date);
+        const overdueDays = Math.max(0, Math.ceil((today - returnDate) / (1000 * 60 * 60 * 24)));
+
+        if (overdueDays > 0 && overdueDays <= 15) {
+          transaction.penalties = overdueDays * 10; // Charge 10 pesos per overdue day
+        } else if (overdueDays > 15) {
+          transaction.penalties = 150; // Maximum penalty of 150 pesos
+          transaction.raw_user_meta_data.user_status = 'Blocked';
+        } else {
+          transaction.penalties = 0; // No penalties if returned on time
+        }
+
+        return transaction;
+      });
+
+      transactions.value.sort((a, b) => {
+        if (a.status === b.status) return 0;
+        return a.status === 'On Going' ? -1 : 1;
+      });
+
     } else {
-      transactions.value = [] // If no data, ensure it is an empty array
+      transactions.value = []; // If no data, ensure it is an empty array
     }
   } catch (err) {
-    console.error('Unexpected error during transaction fetch:', err)
-    error.value = 'An unexpected error occurred. Please refresh the page.'
+    console.error('Unexpected error during transaction fetch:', err);
+    error.value = 'An unexpected error occurred. Please refresh the page.';
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // Function to mark a transaction as returned
-const markAsReturned = async transaction => {
+const markAsReturned = async (transaction) => {
   try {
-    // Update the status in the database
+    // Update the status and penalties in the database
     const { error } = await supabase
       .from('transactions')
-      .update({ status: 'returned' })
-      .eq('id', transaction.id)
+      .update({
+        status: 'Returned',
+        penalties: 0, // Reset penalties
+      })
+      .eq('id', transaction.id);
+
+    // Unblock the user
+    if (transaction.user_meta_data.user_status === 'Blocked') {
+      const { error: unblockError } = await supabase
+        .from('users')
+        .update({ user_status: 'Active' })
+        .eq('email', transaction.email);
+
+      if (unblockError) {
+        console.error('Error unblocking user:', unblockError.message);
+      }
+    }
 
     if (error) {
-      alert('Error marking transaction as returned:', error.message)
-      error.value = 'Failed to update transaction. Please try again.'
-      return
+      alert('Error marking transaction as returned:', error.message);
+      error.value = 'Failed to update transaction. Please try again.';
+      return;
     }
 
     // Remove the transaction from the table locally
-    transactions.value = transactions.value.filter(t => t.id !== transaction.id)
+    transactions.value = transactions.value.filter((t) => t.id !== transaction.id);
 
-    alert(`Book marked as returned and removed from the table.`)
+    alert(`Book marked as returned and user unblocked (if applicable).`);
   } catch (err) {
-    console.error('Unexpected error while marking as returned:', err.message)
-    error.value = 'An unexpected error occurred. Please try again later.'
+    console.error('Unexpected error while marking as returned:', err.message);
+    error.value = 'An unexpected error occurred. Please try again later.';
   }
-}
+};
 
 // Fetch transactions on component mount
-onMounted(fetchTransactions)
+onMounted(fetchTransactions);
 </script>
 
 <template>
@@ -159,7 +198,7 @@ onMounted(fetchTransactions)
     </v-app-bar>
 
     <!-- Main Layout -->
-    <v-row class="main-container">
+    <v-row class="main-container" style="background-color: aliceblue">
       <v-navigation-drawer
         v-model="drawer"
         :temporary="mobile"
@@ -318,6 +357,7 @@ onMounted(fetchTransactions)
   :loading="loading"
   class="responsive-table"
   :hide-default-header="mobile"
+  style="background-color: aliceblue"
 >
   <!-- Display headers only on non-mobile (desktop) screens -->
   <template v-if="!mobile" v-slot:header>
@@ -354,10 +394,10 @@ onMounted(fetchTransactions)
             {{ item.status }}
           </v-chip>
         </div>
-        <div class="table-card-field">
+          <div class="table-card-field" v-if="item.status !== 'Returned'">
           <v-btn @click="markAsReturned(item)" color="green" small>Returned</v-btn>
         </div>
-      </div>
+        </div>
 
       <!-- Default Table Row View for Larger Screens -->
       <tr v-else>
@@ -374,10 +414,13 @@ onMounted(fetchTransactions)
             {{ item.status }}
           </v-chip>
         </td>
-        <td>
-          <v-btn @click="markAsReturned(item)" color="green" small>Returned</v-btn>
-        </td>
-        <td>{{ item.penalties }}</td>
+        <td v-if="item.status !== 'Returned'">
+    <v-btn @click="markAsReturned(item)" color="green" small>Returned</v-btn>
+  </td>
+  <td v-else>
+    <!-- Empty space when the status is returned -->
+  </td>
+        <td>{{ item.penalties }} Php</td>
       </tr>
     </template>
   </template>
