@@ -73,7 +73,7 @@ const transactions = ref([])
 const loading = ref(true)
 const error = ref(null)
 const headers = ref([
-  { title: 'User Info', value: 'user_info' },
+  { title: 'Borrower Name', value: 'user_info' },
   { title: 'Book Title', value: 'book_title' },
   { title: 'Borrow Date', value: 'borrowed_date' },
   { title: 'Return Date', value: 'return_date' },

@@ -70,10 +70,10 @@ const headers = ref([
   { title: 'Borrower Name', value: 'user_info' },
   { title: 'Book Title', value: 'book_title' },
   { title: 'Email', value: 'email' },
-  { title: 'Borrow Date', value: 'borrowed_date', width: '40px' },
-  { title: 'Return Date', value: 'return_date', width: '4 0px' },
+  { title: 'Borrow Date', value: 'borrowed_date', width: '2 px' },
+  { title: 'Return Date', value: 'return_date', width: '2 px' },
   { title: 'Status', value: 'status'},
-  { title: 'Actions', value: 'actions'},
+  { title: 'Actions', value: 'actions', width: '40px'},
 ]);
 
 const fetchTransactions = async () => {
