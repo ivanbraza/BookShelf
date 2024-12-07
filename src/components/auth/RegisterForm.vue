@@ -40,8 +40,9 @@ const onSubmit = async () => {
         data: {
           firstname: formData.value.firstname,
           lastname: formData.value.lastname,
-          role: formData.value.role, // Store role in Supabase
-          is_admin: formData.value.role === 'Librarian' // Assign admin if Librarian
+          role: 'Borrower', // Store role in Supabase
+          is_admin: 'false',// Assign admin if Librarian
+          user_status: 'Active'
         }
       }
     })
@@ -54,12 +55,9 @@ const onSubmit = async () => {
       // Add Success Message
       formAction.value.formSuccessMessage = 'Successfully Registered Account.'
 
-      // Redirect Based on Role
-      if (formData.value.role === 'Librarian') {
-        router.replace('/librarian_dashboard')
-      } else if (formData.value.role === 'Borrower') {
-        router.replace('/dashboard')
-      }
+    
+      router.replace('/dashboard')
+      
     }
   } catch (err) {
     formAction.value.formErrorMessage = 'An unexpected error occurred.'
@@ -142,15 +140,6 @@ const onFormSubmit = () => {
       :rules="[requiredValidator, confirmedValidator(formData.password, formData.password_confirmation)]"
     ></v-text-field>
 
-    <!-- Role Dropdown -->
-    <v-select
-      v-model="formData.role"
-      label="Select Role"
-      :items="['Borrower', 'Librarian']"
-      variant="outlined"
-      density="compact"
-      :rules="[requiredValidator]"
-    ></v-select>
 
     <!-- Register Button -->
     <v-btn
