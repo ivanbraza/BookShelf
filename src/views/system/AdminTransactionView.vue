@@ -40,6 +40,7 @@ watch(mobile, (isMobile) => {
 // Reactive variables
 const firstName = ref('');
 const lastName = ref('');
+const userStatus = ref('');
 
 // Fetch user information
 async function getUserInformation() {
@@ -48,16 +49,18 @@ async function getUserInformation() {
     console.error('Error fetching user information:', error.message);
     return null;
   }
-  if (data.user) {
+  if (data?.user) {
     const { user } = data;
     return {
       firstname: user.user_metadata.firstname || 'Guest',
       lastname: user.user_metadata.lastname || 'User',
+      user_status: user?.raw_user_meta_data?.user_status || 'Unknown',
     };
   } else {
     return null;
   }
 }
+
 
 // Lifecycle hook
 onMounted(async () => {
@@ -65,10 +68,12 @@ onMounted(async () => {
   if (user) {
     firstName.value = user.firstname;
     lastName.value = user.lastname;
+    userStatus.value = user.user_status;
   } else {
     console.error('User not logged in or data not found.');
   }
 });
+
 
 
 // State for transactions
@@ -79,14 +84,14 @@ const headers = ref([
   { title: 'Borrower Name', value: 'user_info' },
   { title: 'Book Title', value: 'book_title' },
   { title: 'Borrow Date', value: 'borrowed_date' },
-  { title: 'Return Date', value: 'return_date' },
+  { title: 'Return Date', value: 'return_date', width: '2 0px' },
   { title: 'Status', value: 'status' },
   { title: 'Actions', value: 'actions' },
   { title: 'Penalty', value: 'penalties' },
 ]);
 
 // Fetch transactions
-const fetchTransactions = async () => {
+async function fetchTransactions() {
   loading.value = true;
   error.value = null;
 
@@ -108,15 +113,22 @@ const fetchTransactions = async () => {
       transactions.value = data.map((transaction) => {
         const today = new Date();
         const returnDate = new Date(transaction.return_date);
-        const overdueDays = Math.max(0, Math.ceil((today - returnDate) / (1000 * 60 * 60 * 24)));
 
-        if (overdueDays > 0 && overdueDays <= 15) {
-          transaction.penalties = overdueDays * 10; // Charge 10 pesos per overdue day
-        } else if (overdueDays > 15) {
-          transaction.penalties = 150; // Maximum penalty of 150 pesos
-          transaction.raw_user_meta_data.user_status = 'Blocked';
+        // Check if the return date is valid
+        if (isNaN(returnDate.getTime())) {
+          console.error(`Invalid return date for transaction id: ${transaction.id}`);
+          transaction.penalties = 0;
         } else {
-          transaction.penalties = 0; // No penalties if returned on time
+          const overdueDays = Math.max(0, Math.ceil((today - returnDate) / (1000 * 60 * 60 * 24)));
+
+          if (overdueDays > 0 && overdueDays <= 15) {
+            transaction.penalties = overdueDays * 10; // 10 pesos per overdue day
+          } else if (overdueDays > 15) {
+            transaction.penalties = 150; // Set to maximum 150 pesos if overdue by more than 15 days
+            userStatus.value = 'Blocked';
+          } else {
+            transaction.penalties = 0;
+          }
         }
 
         return transaction;
@@ -126,9 +138,8 @@ const fetchTransactions = async () => {
         if (a.status === b.status) return 0;
         return a.status === 'On Going' ? -1 : 1;
       });
-
     } else {
-      transactions.value = []; // If no data, ensure it is an empty array
+      transactions.value = [];
     }
   } catch (err) {
     console.error('Unexpected error during transaction fetch:', err);
@@ -138,45 +149,43 @@ const fetchTransactions = async () => {
   }
 };
 
+
 // Function to mark a transaction as returned
 const markAsReturned = async (transaction) => {
   try {
-    // Update the status and penalties in the database
     const { error } = await supabase
       .from('transactions')
       .update({
         status: 'Returned',
-        penalties: 0, // Reset penalties
+        penalties: 0,
       })
       .eq('id', transaction.id);
 
-    // Unblock the user
-    if (transaction.user_meta_data.user_status === 'Blocked') {
+    if (error) {
+      alert('Error marking transaction as returned');
+      console.error('Error:', error.message);
+      return;
+    }
+
+    if (userStatus.value === 'Blocked') {
       const { error: unblockError } = await supabase
         .from('users')
         .update({ user_status: 'Active' })
         .eq('email', transaction.email);
 
       if (unblockError) {
-        console.error('Error unblocking user:', unblockError.message);
+        console.error('Failed to unblock user:', unblockError.message);
       }
     }
 
-    if (error) {
-      alert('Error marking transaction as returned:', error.message);
-      error.value = 'Failed to update transaction. Please try again.';
-      return;
-    }
+    transactions.value = transactions.value.filter(t => t.id !== transaction.id);
 
-    // Remove the transaction from the table locally
-    transactions.value = transactions.value.filter((t) => t.id !== transaction.id);
-
-    alert(`Book marked as returned and user unblocked (if applicable).`);
+    alert('Book marked as returned and user unblocked if applicable');
   } catch (err) {
-    console.error('Unexpected error while marking as returned:', err.message);
-    error.value = 'An unexpected error occurred. Please try again later.';
+    console.error('Unexpected error while marking transaction as returned:', err);
   }
 };
+
 
 // Fetch transactions on component mount
 onMounted(fetchTransactions);
@@ -446,7 +455,7 @@ onMounted(fetchTransactions);
       style="background-color: #232d3f"
     >
       <v-row justify="start">
-        <v-col class="devcol text-right py-2 white-text">
+        <v-col class="devcol text-right py-2 white-text footer">
       2024 - Book Shelf
     </v-col>
       </v-row>
@@ -647,4 +656,12 @@ onMounted(fetchTransactions);
   color: #232624;
   font-size: 28px;
 }
+
+.footer {
+  background: #2e3b55;
+  color: white;
+  text-align: center;
+  padding: 10px 0;
+}
+
 </style>

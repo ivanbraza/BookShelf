@@ -24,12 +24,6 @@ const {
   handleChangePassword,
 } = useChangePassword()
 
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return 'Invalid Date';
-  return date.toLocaleDateString(); 
-};
-
 const logoutModalRef = ref(null);
 const openLogoutModal = () => logoutModalRef.value?.open();
 
@@ -377,7 +371,7 @@ onMounted(fetchTransactions);
           <td>{{ item.book_title }}</td>
           <td>{{ item.email}}</td>
           <td>{{ item.borrowed_date }}</td>
-          <td>{{ item.borrowed_date }}</td>
+          <td>{{ item.return_date }}</td>
           <td>
             <v-chip :color="item.status === 'confirmed' ? 'green' : 'orange'" text-color="white" small>
               {{ item.status }}
@@ -401,7 +395,7 @@ onMounted(fetchTransactions);
     </v-row>
 
     <!-- Footer -->
-    <v-footer class="font-weight-bold" elevation="24" app style="background-color: #232D3F;">
+    <v-footer class="font-weight-bold footer" elevation="24" app style="background-color: #232D3F;">
       <v-row justify="start">
         <v-col class="devcol text-right py-2 white-text">
       2024 - Book Shelf
@@ -425,6 +419,14 @@ onMounted(fetchTransactions);
 .v-footer {
   z-index: 1000;
 }
+
+.footer {
+  background: #2e3b55;
+  color: white;
+  text-align: center;
+  padding: 10px 0;
+}
+
 
 .no-underline {
   text-decoration: none;

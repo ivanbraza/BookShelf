@@ -179,7 +179,7 @@ const submitForm = async () => {
     return
   }
 
-  if (new Date(currentDate) <= new Date(selectedBorrowDate.value)){
+  if (new Date(currentDate) > new Date(selectedBorrowDate.value)){
     alert('Error: Borrow date must be later than the current date.')
     return
   }
