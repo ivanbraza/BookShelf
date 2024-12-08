@@ -60,7 +60,7 @@ async function getUserInformation() {
 
 const getChipColor = (status) => {
   switch (status) {
-    case 'On Going':
+    case 'Ongoing':
       return 'green'; // confirmed status will be green
     case 'Denied':
       return 'red';   // denied status will be red
@@ -155,7 +155,7 @@ const fetchTransactions = async () => {
 
   // Handle sorting logic with priority mapping
   const priority = { 
-    'On Going': 1,    // Highest priority
+    'Ongoing': 1,    // Highest priority
     'Pending': 2,    // Second priority
     'Returned': 3,   // Third priority
     'Denied': 4      // Fourth priority
@@ -383,7 +383,7 @@ onMounted(fetchTransactions)
           </div>
           <div class="table-card-field">
             <span class="field-label">Status:</span>
-            <v-chip :color="item.status === 'confirmed' ? 'green' : 'orange'" text-color="white" small>
+            <v-chip :color="item.status === 'Ongoing' ? 'green' : item.status === 'Pending' ? 'orange' : item.status === 'Returned' ? 'blue' : item.status === 'Denied' ? 'red' : 'grey'" text-color='white' small>
               {{ item.status }}
             </v-chip>
           </div>
@@ -399,7 +399,7 @@ onMounted(fetchTransactions)
           <td>{{ item.borrowed_date }}</td>
           <td>{{ item.borrowed_date }}</td>
           <td>
-            <v-chip :color="item.status === 'On Going' ? 'green' : item.status === 'Pending' ? 'orange' : item.status === 'Returned' ? 'blue' : item.status === 'Denied' ? 'red' : 'grey'" text-color='white' small>
+            <v-chip :color="item.status === 'Ongoing' ? 'green' : item.status === 'Pending' ? 'orange' : item.status === 'Returned' ? 'blue' : item.status === 'Denied' ? 'red' : 'grey'" text-color='white' small>
               {{ item.status }}
             </v-chip>
           </td>

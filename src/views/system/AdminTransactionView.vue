@@ -101,7 +101,7 @@ async function fetchTransactions() {
       .select(
         'id, book_title, user_info, email, borrowed_date, return_date, status, penalties'
       )
-      .in('status', ['On Going', 'Returned']);
+      .in('status', ['Ongoing', 'Returned']);
 
     if (fetchError) {
       console.error('Supabase query error:', fetchError.message);
@@ -136,7 +136,7 @@ async function fetchTransactions() {
 
       transactions.value.sort((a, b) => {
         if (a.status === b.status) return 0;
-        return a.status === 'On Going' ? -1 : 1;
+        return a.status === 'Ongoing' ? -1 : 1;
       });
     } else {
       transactions.value = [];
@@ -395,11 +395,7 @@ onMounted(fetchTransactions);
         </div>
         <div class="table-card-field">
           <span class="field-label">Status:</span>
-          <v-chip
-            :color="item.status === 'confirmed' ? 'green' : 'orange'"
-            text-color="white"
-            small
-          >
+          <v-chip :color="item.status === 'Ongoing' ? 'green' : item.status === 'Pending' ? 'orange' : item.status === 'Returned' ? 'blue' : item.status === 'Denied' ? 'red' : 'grey'" text-color='white' small>
             {{ item.status }}
           </v-chip>
         </div>
@@ -415,11 +411,7 @@ onMounted(fetchTransactions);
         <td>{{ item.borrowed_date }}</td>
         <td>{{ item.return_date }}</td>
         <td>
-          <v-chip
-            :color="item.status === 'confirmed' ? 'green' : 'orange'"
-            text-color="white"
-            small
-          >
+          <v-chip :color="item.status === 'Ongoing' ? 'green' : item.status === 'Pending' ? 'orange' : item.status === 'Returned' ? 'blue' : item.status === 'Denied' ? 'red' : 'grey'" text-color='white' small>
             {{ item.status }}
           </v-chip>
         </td>

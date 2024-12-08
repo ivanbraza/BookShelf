@@ -253,8 +253,8 @@ const fetchTotalBooks = async () => {
 
 const fetchTransactionStats = async () => {
   const { data } = await supabase.from('transactions').select('status')
-  const booksBorrowed = data.filter(t => t.status === 'confirmed').length
-  const booksReturned = data.filter(t => t.status === 'returned').length
+  const booksBorrowed = data.filter(t => t.status === 'Ongoing').length
+  const booksReturned = data.filter(t => t.status === 'Returned').length
   return { booksBorrowed, booksReturned }
 }
 
