@@ -718,7 +718,8 @@ onMounted(async () => {
 }
 
 .app-bar {
-  z-index: 1000;
+  background: #2e3b55;
+  color: white;
 }
 
 .v-footer {

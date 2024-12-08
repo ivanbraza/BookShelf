@@ -437,10 +437,13 @@ onMounted(fetchTransactions)
 </template>
 
 <style scoped>
+/* General styles */
 .app-bar {
   background: #2e3b55;
   color: white;
 }
+
+
 
 .v-footer {
   z-index: 1000;
@@ -524,17 +527,43 @@ onMounted(fetchTransactions)
   font-size: 28px;
 }
 
-/* Make tables responsive on mobile */
+/* Styles for mobile devices */
 @media screen and (max-width: 600px) {
+  /* Enable horizontal scrolling for tables */
   .v-data-table .v-data-table__wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
 
-  .v-data-table th,
-  .v-data-table td {
+  .v-data-table th, .v-data-table td {
     font-size: 14px;
     padding: 12px;
+  }
+
+  /* Card view for mobile */
+  .table-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: white;
+  }
+
+  .table-card-field {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .field-label {
+    font-weight: bold;
+    color: #232624;
+  }
+
+  .field-value {
+    color: #555;
   }
 
   .content-area {
@@ -547,6 +576,4 @@ onMounted(fetchTransactions)
     font-size: 1rem;
   }
 }
-
-
 </style>
