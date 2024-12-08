@@ -135,7 +135,7 @@ const handleAccept = async (item) => {
   try {
     const { error: updateError } = await supabase
       .from('transactions')
-      .update({ status: 'On Going' })
+      .update({ status: 'Ongoing' })
       .eq('id', item.id);
 
     if (updateError) {
@@ -353,7 +353,7 @@ onMounted(fetchTransactions);
           </div>
           <div class="table-card-field">
             <span class="field-label">Status:</span>
-            <v-chip :color="item.status === 'confirmed' ? 'green' : 'orange'" text-color="white" small>
+            <v-chip :color="item.status === 'Ongoing' ? 'green' : 'orange'" text-color="white" small>
               {{ item.status }}
             </v-chip>
           </div>
@@ -373,7 +373,7 @@ onMounted(fetchTransactions);
           <td>{{ item.borrowed_date }}</td>
           <td>{{ item.return_date }}</td>
           <td>
-            <v-chip :color="item.status === 'confirmed' ? 'green' : 'orange'" text-color="white" small>
+            <v-chip :color="item.status === 'Ongoing' ? 'green' : 'orange'" text-color="white" small>
               {{ item.status }}
             </v-chip>
           </td>
