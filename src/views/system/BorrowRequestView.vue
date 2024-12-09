@@ -117,7 +117,7 @@ const sendEmailNotification = (user_name ,email, bookTitle, actions, return_date
       import.meta.env.VITE_EMAILJS_SERVICE_ID, // Access from .env
       import.meta.env.VITE_EMAILJS_TEMPLATE_ID, // Access from .env
       templateParams,
-      import.meta.env.VITE_EMAILJS_PUBLIC_KEY // Access from .env
+      'A9ly90e8lhowIaTzt' // Access from .env
     )
     .then(
       (response) => {

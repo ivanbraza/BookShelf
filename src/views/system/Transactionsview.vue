@@ -397,7 +397,7 @@ onMounted(fetchTransactions)
         <tr v-else>
           <td>{{ item.book_title }}</td>
           <td>{{ item.borrowed_date }}</td>
-          <td>{{ item.borrowed_date }}</td>
+          <td>{{ item.return_date }}</td>
           <td>
             <v-chip :color="item.status === 'Ongoing' ? 'green' : item.status === 'Pending' ? 'orange' : item.status === 'Returned' ? 'blue' : item.status === 'Denied' ? 'red' : 'grey'" text-color='white' small>
               {{ item.status }}
